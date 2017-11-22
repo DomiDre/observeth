@@ -1,0 +1,11 @@
+<div>
+  <p>Welcome to Ethereum Watcher.</p>
+</div>
+
+<button (click)='getBlockchainInfo()'>Get Info</button>  
+<div *ngIf='connected_account'>
+  <p>Connected with account {{connected_account}}</p> 
+</div>
+<div *ngIf='block_number'>
+  <p>Blocknumber: {{block_number}}</p> 
+</div>
