@@ -1,3 +1,41 @@
-<p>
-  contract-observer works!
-</p>
+<div>
+  Token Contract: 
+  <input [(ngModel)]=tokenContractAddress 
+         placeholder="Token Contract Address">
+</div>
+<div>
+  Get data from X last blocks: 
+  <input [(ngModel)]=numBlocks 
+         placeholder="Get data from last X blocks">
+</div>
+
+<button (click)='updateData()'>Load Data</button>
+<!-- <div *ngIf="loadingProcessing">
+  Loading Data...
+  <div class="progress">
+    <div class="progress-bar progress-bar-success progress-bar-striped" 
+          role="progressbar" [attr.aria-valuenow]="progress" 
+          aria-valuemin="0" 
+          aria-valuemax ="100" 
+          style="min-width: 2em;" [style.width]="progress + '%'">
+          {{progress}}%
+    </div>
+  </div>
+</div> -->
+<div *ngIf='transactionList && !loadingProcessing'>
+  <p><u>Transactions</u></p> 
+    <ul>
+      <li *ngFor="let tx of transactionList">
+        {{tx.transactionHash}} <a target="_blank" 
+                      href='https://etherscan.io/tx/{{tx.transactionHash}}'><i class="fa fa-external-link"></i></a>
+<!--         <ul>
+          <li>From: {{tx.from}}</li>
+          <li>To: {{tx.to}}</li>
+          <li>Value: {{tx.value/1e18}} Ξ</li>
+          <li>Gas: {{tx.gas}}  </li>
+          <li>GasPrice: {{tx.gasPrice/1e9}} GWei </li>
+          <li>Gas paid: {{tx.gasPrice*tx.gas/1e18}} Ξ </li>
+        </ul> -->
+      </li>
+    </ul>
+</div>
