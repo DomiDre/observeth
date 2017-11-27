@@ -3,11 +3,15 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { ContractObserverComponent } from './contract-observer/contract-observer.component';
 import { MainComponent } from './main/main.component';
+import { DonateComponent } from './donate/donate.component';
+import { AboutComponent } from './about/about.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/main', pathMatch: 'full'},
   { path: 'main', component:MainComponent},
-  { path: 'ContractObserve', component:ContractObserverComponent}
+  { path: 'ContractObserve', component:ContractObserverComponent},
+  { path: 'About', component:AboutComponent},
+  { path: 'Donate', component:DonateComponent}
 ];
 
 @NgModule({  
