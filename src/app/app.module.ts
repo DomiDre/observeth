@@ -11,6 +11,7 @@ import { MainComponent } from './main/main.component';
 import { DonateComponent } from './donate/donate.component';
 import { AboutComponent } from './about/about.component';
 import { Web3ConnectService } from './shared/web3-connect.service';
+import { TestpageComponent } from './testpage/testpage.component';
 
 
 @NgModule({
@@ -20,7 +21,8 @@ import { Web3ConnectService } from './shared/web3-connect.service';
     ContractObserverComponent,
     MainComponent,
     DonateComponent,
-    AboutComponent
+    AboutComponent,
+    TestpageComponent
   ],
   imports: [
     BrowserModule,

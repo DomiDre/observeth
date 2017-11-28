@@ -5,13 +5,15 @@ import { ContractObserverComponent } from './contract-observer/contract-observer
 import { MainComponent } from './main/main.component';
 import { DonateComponent } from './donate/donate.component';
 import { AboutComponent } from './about/about.component';
+import { TestpageComponent } from './testpage/testpage.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/main', pathMatch: 'full'},
   { path: 'main', component:MainComponent},
   { path: 'ContractObserve', component:ContractObserverComponent},
   { path: 'About', component:AboutComponent},
-  { path: 'Donate', component:DonateComponent}
+  { path: 'Donate', component:DonateComponent},
+  { path: 'Testpage', component:TestpageComponent}
 ];
 
 @NgModule({  
