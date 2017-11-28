@@ -31,25 +31,25 @@ export class ContractObserverComponent implements OnInit {
     this.progress = 0;
 
 
-    this.web3service.web3.eth.getBlockNumber()
-      .then(blocknumber => {
-        this.latestBlockNumber = blocknumber;
-        this.firstBlockNumber = blocknumber-this.numBlocks;
-        this.processingBlockNumber = this.firstBlockNumber;
-      })
+    // this.web3service.web3.eth.getBlockNumber()
+    //   .then(blocknumber => {
+    //     this.latestBlockNumber = blocknumber;
+    //     this.firstBlockNumber = blocknumber-this.numBlocks;
+    //     this.processingBlockNumber = this.firstBlockNumber;
+    //   })
+    //   .then(() => {
+    //     this.web3service.web3.eth.subscribe('logs',
+    //     { fromBlock: this.firstBlockNumber, 
+    //       toBlock: this.latestBlockNumber,
+    //       address: this.tokenContractAddress
+    //     }, (error, result) => {
+    //       console.log(error, result);
+    //       this.transactionList.push(result);
+    //       this.processingBlockNumber = result.blockNumber;
+    //       console.log(result);
+    //     })}
+    //   ).then(() => this.loadingProcessing=false);
       // METAMASK AND WEB3.0 DOESNT SUPPORT SUBSCRIBE...
-      // .then(() => {
-      //   this.web3service.web3.eth.subscribe('logs',
-      //   { fromBlock: this.firstBlockNumber, 
-      //     toBlock: this.latestBlockNumber,
-      //     address: this.tokenContractAddress
-      //   }, (error, result) => {
-      //     console.log(error, result);
-      //     this.transactionList.push(result);
-      //     this.processingBlockNumber = result.blockNumber;
-      //     console.log(result);
-      //   })}
-      // ).then(() => this.loadingProcessing=false);
     
   }
     
