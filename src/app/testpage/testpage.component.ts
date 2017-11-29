@@ -18,7 +18,7 @@ export class TestpageComponent implements OnInit {
     
     // Create a DataSet (allows two way data-binding)
     var nodes = new vis.DataSet([
-              {id: 1, label: 'Node 1', size: 10},
+              {id: 1, label: 'Node 1', size: 10, url:'http://www.google.com', title: 'GOOOOOGLE'},
               {id: 2, label: 'Node 2', size: 20},
               {id: 3, label: 'Node 3', size: 30},
               {id: 4, label: 'Node 4', size: 40},
@@ -37,7 +37,8 @@ export class TestpageComponent implements OnInit {
           edges: edges
         };
     // Configuration for the Timeline
-    var options = {      nodes: {
+    var options = {
+      nodes: {
         shape: 'dot',
         scaling: {
           min: 10,
@@ -63,14 +64,21 @@ export class TestpageComponent implements OnInit {
       },
       physics: false,
       interaction: {
+        dragNodes: false,
         tooltipDelay: 200,
-        hideEdgesOnDrag: true
+        hover: true
       }
     };
 
     // Create a Timeline
     var timeline = new vis.Network(container, data, options);
-  	
+  	// timeline.dragNodes = false;
+    timeline.on("selectNode", params => {
+        if (params.nodes.length === 1) {
+            var node = nodes.get(params.nodes[0]);
+            window.open(node.url, '_blank');
+        }
+    });
   }
 
 }
