@@ -22,20 +22,20 @@
     </div>
   </div>
 </div> -->
-<div *ngIf='transactionList && !loadingProcessing'>
+<!-- <div *ngIf='transactionList && !loadingProcessing'>
   <p><u>Transactions</u></p> 
     <ul>
       <li *ngFor="let tx of transactionList">
-        {{tx.transactionHash}} <a target="_blank" 
-                      href='https://etherscan.io/tx/{{tx.transactionHash}}'><i class="fa fa-external-link"></i></a>
-<!--         <ul>
+        {{tx.hash}} <a target="_blank" 
+                      href='https://etherscan.io/tx/{{tx.hash}}'>
+                      <i class="fa fa-external-link"></i>
+                    </a>
+        <ul>
           <li>From: {{tx.from}}</li>
           <li>To: {{tx.to}}</li>
-          <li>Value: {{tx.value/1e18}} Ξ</li>
-          <li>Gas: {{tx.gas}}  </li>
-          <li>GasPrice: {{tx.gasPrice/1e9}} GWei </li>
-          <li>Gas paid: {{tx.gasPrice*tx.gas/1e18}} Ξ </li>
-        </ul> -->
+          <li>Value: {{tx.value}}</li>
+        </ul>
       </li>
     </ul>
-</div>
+</div> -->
+<p class='TokenMindmap' id="visualization"></p>

@@ -15,8 +15,8 @@ export class Web3ConnectService {
         this.web3 = new this.Web3(this.web3.currentProvider);
       } else {
         // use websocket provider. Run geth with: geth --syncmode "light" --ws --wsorigins "*" --rpc
-        //this.web3 = new this.Web3(new this.Web3.providers.WebsocketProvider('ws://localhost:8546')
-        this.web3 = new this.Web3('https://mainnet.infura.io/506w9CbDQR8fULSDR7H0');
+        this.web3 = new this.Web3('ws://localhost:8546');
+        // this.web3 = new this.Web3('https://mainnet.infura.io/506w9CbDQR8fULSDR7H0');
         // this.web3 = new this.Web3(new this.Web3.providers.HttpProvider('https://mainnet.infura.io/506w9CbDQR8fULSDR7H0'));
       }
       console.log('Web3 version:', this.web3.version);
