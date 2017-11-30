@@ -30,17 +30,31 @@ export class MainComponent implements OnInit {
     .subscribe( () => this.updateBlock())
   }
 
+  // WEB3 0.20.2:
   updateBlock(): void {
-    this.web3service.web3.eth.getAccounts()
-      .then(accounts => this.connected_account = accounts[0]);
+    this.web3service.web3.eth.getAccounts(
+      (error, accounts) => this.connected_account = accounts[0]);
   
-    this.web3service.web3.eth.getBlockNumber()
-      .then(blocknumber =>this.block_number = blocknumber);
+    this.web3service.web3.eth.getBlockNumber(
+      (error, blocknumber) => this.block_number = blocknumber);
 
-    this.web3service.web3.eth.getBlock('latest', true)
-      .then(curblock => this.current_block = curblock)
-      .then(() =>  this.updateDisplayData());
+    this.web3service.web3.eth.getBlock('latest', true,
+      (error, curblock) => {this.current_block = curblock
+                            this.updateDisplayData()});
   }
+  
+  // WEB3 1.0:
+  // updateBlock(): void {
+  //   this.web3service.web3.eth.getAccounts()
+  //     .then(accounts => this.connected_account = accounts[0]);
+  
+  //   this.web3service.web3.eth.getBlockNumber()
+  //     .then(blocknumber =>this.block_number = blocknumber);
+
+  //   this.web3service.web3.eth.getBlock('latest', true)
+  //     .then(curblock => this.current_block = curblock)
+  //     .then(() =>  this.updateDisplayData());
+  // }
 
   updateDisplayData(): void {
     this.zone.run(() => {

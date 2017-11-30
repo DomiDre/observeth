@@ -2,6 +2,12 @@ import { Injectable } from '@angular/core';
 
 import Web3 from 'web3';
 
+declare global {
+  interface Window { web3: any; }
+}
+
+window.web3 = window.web3 || {};
+
 @Injectable()
 export class Web3ConnectService {
 
@@ -10,16 +16,25 @@ export class Web3ConnectService {
   constructor() {}
 
   connectToNode(): void { 
-      console.log('Connecting to web3.')
+      console.log('Connecting to web3...')
       if (typeof this._web3 !== 'undefined') {
         this.web3 = new this.Web3(this.web3.currentProvider);
-      } else {
-        // use websocket provider. Run geth with: geth --syncmode "light" --ws --wsorigins "*" --rpc
-        this.web3 = new this.Web3('ws://localhost:8546');
-        // this.web3 = new this.Web3('https://mainnet.infura.io/506w9CbDQR8fULSDR7H0');
-        // this.web3 = new this.Web3(new this.Web3.providers.HttpProvider('https://mainnet.infura.io/506w9CbDQR8fULSDR7H0'));
+      } 
+      else if (typeof window.web3 !== 'undefined') {
+        console.log('Connecting to metamask web3.')
+        this.web3 = new Web3(window.web3.currentProvider);
       }
-      console.log('Web3 version:', this.web3.version);
+      else {
+        // use websocket provider. Run geth with: geth --syncmode "light" --ws --wsorigins "*" --rpc
+        // this.web3 = new this.Web3('ws://localhost:8546');
+
+        // Connect using web3 0.20.2
+        console.log('Connecting to Infura.')
+        this.web3 = new this.Web3(
+          new this.Web3.providers.HttpProvider('https://mainnet.infura.io/506w9CbDQR8fULSDR7H0'));
+      }
+      //console.log('Web3 version:', this.web3.version);
+      console.log('Web3 version:', this.web3.version.api);
   }
 
   get web3(): any {

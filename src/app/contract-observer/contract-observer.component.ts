@@ -41,12 +41,97 @@ export class ContractObserverComponent implements OnInit {
     document.getElementById('text').innerHTML = '0%';
     document.getElementById('bar').style.width = '0px';
 
-    this.web3service.web3.eth.getBlockNumber() // gets the latest block number
-    .then(blocknumber => this.updateFirstAndLastBlockNumber(blocknumber))
-    .then(() => this.getLogs())
-    .then(logs => this.evaluateLogs(logs))
-    .then(() => this.makeMindmap())
-    .then(() => this.loadingProcessing=false);
+    // Web3 0.20.2
+    this.web3service.web3.eth.getBlockNumber(
+      (error, blocknumber) => {
+      this.updateFirstAndLastBlockNumber(blocknumber);
+      this.web3service.web3.eth.filter({
+        fromBlock: this.firstBlockNumber,
+        toBlock: this.latestBlockNumber,
+        address: this.tokenContractAddress
+      })
+      .get((error, logs) => this.evaluateLogs0_20(logs, 
+        () => {
+          this.makeMindmap();
+          this.loadingProcessing = false;
+        })
+      )
+    });
+
+
+      // , (error, txData) => {
+      //   if(!error) {
+      //     let methodId = txData.topics['0'];
+      //     if (methodId === TransferHex) { // transfer: 1 transfers to 2 
+      //       let txEntry = new TXData();
+      //       txEntry.hash = txData.transactionHash;
+      //       // check 1e18 factor
+      //       txEntry.value = this.web3service.web3.toDecimal(txData.data)/1e18;
+      //       txEntry.from = this.removeLeadingZeros0_20(txData.topics['1']);
+      //       txEntry.to = this.removeLeadingZeros0_20(txData.topics['2']);
+      //       this.transactionList.push(txEntry);
+      //     } else if (methodId == ApproveHex) { // approve: you allowed somebody else to withdraw from your account
+      //       // not implemented yet
+      //     } else {
+      //       console.log(methodId,' not known, check ', txData.transactionHash,'. Please report this.');
+      //     }
+      //     this.processingBlockNumber = txData.blockNumber;     
+      //   }})
+    // });
+
+
+
+
+    // .then(logs => this.evaluateLogs(logs))
+    // .then(() => this.makeMindmap())
+    // .then(() => this.loadingProcessing=false);
+
+    
+    // Web3 1.0
+    // this.web3service.web3.eth.getBlockNumber() // gets the latest block number
+    // .then(blocknumber => this.updateFirstAndLastBlockNumber(blocknumber))
+    // .then(() => this.getLogs())
+    // .then(logs => this.evaluateLogs(logs))
+    // .then(() => this.makeMindmap())
+    // .then(() => this.loadingProcessing=false);
+  }
+
+  updateFirstAndLastBlockNumber(blocknumber): void {
+      this.latestBlockNumber = blocknumber;
+      this.firstBlockNumber = blocknumber-this.numBlocks;
+      this.processingBlockNumber = this.firstBlockNumber;
+  }
+
+  getLogs(): Promise<any> {
+    return this.web3service.web3.eth.getPastLogs( { 
+      fromBlock: this.web3service.web3.utils.toHex(this.firstBlockNumber),
+      toBlock: this.web3service.web3.utils.toHex(this.latestBlockNumber),
+      address: this.tokenContractAddress
+    })
+  }
+  
+  evaluateLogs0_20(logs, callback): void {
+    let TransferHex = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+    let ApproveHex = '0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925';
+
+    for(let txData of logs) {
+      let methodId = txData.topics['0'];
+      if (methodId === TransferHex) { // transfer: 1 transfers to 2 
+        let txEntry = new TXData();
+        txEntry.hash = txData.transactionHash;
+        // check 1e18 factor
+        txEntry.value = this.web3service.web3.toDecimal(txData.data)/1e18;
+        txEntry.from = txData.topics['1'].replace(/0x0*/,'0x');
+        txEntry.to = txData.topics['2'].replace(/0x0*/,'0x');
+        this.transactionList.push(txEntry);
+      } else if (methodId == ApproveHex) { // approve: you allowed somebody else to withdraw from your account
+        // not implemented yet
+      } else {
+        console.log(methodId,' not known, check ', txData.transactionHash,'. Please report this.');
+      }
+      this.processingBlockNumber = txData.blockNumber;
+      callback();
+    }
   }
 
   removeLeadingZeros(data): string {
@@ -57,24 +142,6 @@ export class ContractObserverComponent implements OnInit {
       }
     }
     return this.web3service.web3.utils.bytesToHex(byteData);
-  }
-
-  updateFirstAndLastBlockNumber(blocknumber): void {
-      this.latestBlockNumber = blocknumber;
-      this.firstBlockNumber = blocknumber-this.numBlocks;
-      this.processingBlockNumber = this.firstBlockNumber;
-  }
-
-  toHex(x: number): string {
-    return this.web3service.web3.utils.toHex(x);
-  }
-
-  getLogs(): Promise<any> {
-    return this.web3service.web3.eth.getPastLogs( { 
-      fromBlock: this.toHex(this.firstBlockNumber),
-      toBlock: this.toHex(this.latestBlockNumber),
-      address: this.tokenContractAddress
-    })
   }
 
   evaluateLogs(logs): void {
@@ -135,7 +202,7 @@ export class ContractObserverComponent implements OnInit {
         id_running++;
       }
 
-      edgeList.push({from: id_from, to: id_to});
+      edgeList.push({from: id_from, to: id_to, title: 'Value: ' + tx_value});
 
       
 
@@ -147,7 +214,7 @@ export class ContractObserverComponent implements OnInit {
         label: nodeList[i].slice(0, 8),
         size: 10,
         url: 'https://etherscan.io/address/'+nodeList[i],
-        title: 'test '+i
+        title: 'Wallet: '+ nodeList[i]
       })
     }
 
