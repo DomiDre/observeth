@@ -20,13 +20,33 @@ export class ContractObserverComponent implements OnInit {
   private loadingProcessing: boolean=false;
   private processingBlockNumber: number;
   private current_subscription: any;
+  private network: any;
+
   @Input() private progress: number;
+
   constructor(private zone: NgZone,
               private web3service: Web3ConnectService,
               private element: ElementRef) { }
 
   ngOnInit() {
-    this.updateData();
+  }
+
+  updateData(): void {
+    this.transactionList = new Array<any>();
+    this.loadingProcessing = true;
+    this.progress = 0;
+
+    document.getElementById('loadingBar').style.display = 'block';
+    document.getElementById('loadingBar').style.opacity = '10';
+    document.getElementById('text').innerHTML = '0%';
+    document.getElementById('bar').style.width = '0px';
+
+    this.web3service.web3.eth.getBlockNumber() // gets the latest block number
+    .then(blocknumber => this.updateFirstAndLastBlockNumber(blocknumber))
+    .then(() => this.getLogs())
+    .then(logs => this.evaluateLogs(logs))
+    .then(() => this.makeMindmap())
+    .then(() => this.loadingProcessing=false);
   }
 
   removeLeadingZeros(data): string {
@@ -39,74 +59,47 @@ export class ContractObserverComponent implements OnInit {
     return this.web3service.web3.utils.bytesToHex(byteData);
   }
 
-  updateData(): void {
-    this.transactionList = new Array<any>();
-    this.loadingProcessing = true;
-    this.progress = 0;
-    // if (this.current_subscription) {
-    //   console.log('Unsubscribing previous subscription.')
-    //   this.current_subscription.unsubscribe((err,res) => {
-    //       if(res) {
-    //         console.log('Unsubscribed previous subscription');
-    //       }}
-    //   )
-    // }
-    let TransferHex = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
-    let ApproveHex = '0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925';
-    this.web3service.web3.eth.getBlockNumber()
-    .then(blocknumber => {
+  updateFirstAndLastBlockNumber(blocknumber): void {
       this.latestBlockNumber = blocknumber;
       this.firstBlockNumber = blocknumber-this.numBlocks;
       this.processingBlockNumber = this.firstBlockNumber;
-    })
-    .then(() => {
-      console.log('Subscribing to logs.');
-      console.log(this.firstBlockNumber,
-                  this.latestBlockNumber,
-                  this.tokenContractAddress);
+  }
 
-      return this.web3service.web3.eth.getPastLogs( { 
-        fromBlock: this.web3service.web3.utils.toHex(this.firstBlockNumber),
-        toBlock: this.web3service.web3.utils.toHex(this.latestBlockNumber),
-        address: this.tokenContractAddress
-      }).then(result => {
+  toHex(x: number): string {
+    return this.web3service.web3.utils.toHex(x);
+  }
 
-        for(let txData of result) {
-          let methodId = txData.topics['0'];
-
-          if (methodId === TransferHex) {
-            let txEntry = new TXData();
-            txEntry.hash = txData.transactionHash;
-            // check 1e18 factor
-            txEntry.value = this.web3service.web3.utils.hexToNumberString(txData.data)/1e18;
-            txEntry.from = this.removeLeadingZeros(txData.topics['1']);
-            txEntry.to = this.removeLeadingZeros(txData.topics['2']);
-            this.transactionList.push(txEntry);
-
-          } else if (methodId == ApproveHex) {
-            // not implemented yet
-            // console.log(txData, methodId)
-            // let txEntry = new TXData();
-            // txEntry.hash = txData.transactionHash;
-            // check 1e18 factor
-            // txEntry.value = this.web3service.web3.utils.hexToNumberString(txData.data)/1e18;
-            // txEntry.from = this.removeLeadingZeros(txData.topics['1']);
-            // txEntry.to = this.removeLeadingZeros(txData.topics['2']);
-            // this.transactionList.push(txEntry);
-          } else {
-            console.log(methodId,' not known, check ', txData.transactionHash);
-          }
-
-          
-
-          this.processingBlockNumber = txData.blockNumber;          
-        }
-      }).then(() => {
-        this.loadingProcessing=false;
-        this.makeMindmap();
-      });
+  getLogs(): Promise<any> {
+    return this.web3service.web3.eth.getPastLogs( { 
+      fromBlock: this.toHex(this.firstBlockNumber),
+      toBlock: this.toHex(this.latestBlockNumber),
+      address: this.tokenContractAddress
     })
   }
+
+  evaluateLogs(logs): void {
+    let TransferHex = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+    let ApproveHex = '0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925';
+
+    for(let txData of logs) {
+      let methodId = txData.topics['0'];
+      if (methodId === TransferHex) { // transfer: 1 transfers to 2 
+        let txEntry = new TXData();
+        txEntry.hash = txData.transactionHash;
+        // check 1e18 factor
+        txEntry.value = this.web3service.web3.utils.hexToNumberString(txData.data)/1e18;
+        txEntry.from = this.removeLeadingZeros(txData.topics['1']);
+        txEntry.to = this.removeLeadingZeros(txData.topics['2']);
+        this.transactionList.push(txEntry);
+      } else if (methodId == ApproveHex) { // approve: you allowed somebody else to withdraw from your account
+        // not implemented yet
+      } else {
+        console.log(methodId,' not known, check ', txData.transactionHash,'. Please report this.');
+      }
+      this.processingBlockNumber = txData.blockNumber;          
+    }
+  }
+
 
   makeMindmap(): void {
     let nodeList = new Array();
@@ -158,7 +151,7 @@ export class ContractObserverComponent implements OnInit {
       })
     }
 
-    var container = document.getElementById('visualization');
+    let container = document.getElementById('TokenMindmap');
     // Create a DataSet (allows two way data-binding)
     let nodes = new vis.DataSet(nodeArray)
     //         // create an array with edges
@@ -204,14 +197,32 @@ export class ContractObserverComponent implements OnInit {
 
     // console.log(container)
     // Create a Timeline
-    let timeline = new vis.Network(container, data, options);
-    // timeline.dragNodes = false;
-    timeline.on("selectNode", params => {
+    this.network = new vis.Network(container, data, options);
+    
+    this.network.on("selectNode", params => {
         if (params.nodes.length === 1) {
-            var node = nodes.get(params.nodes[0]);
+            let node = nodes.get(params.nodes[0]);
             window.open(node.url, '_blank');
         }
     });
+
+    this.network.on("stabilizationProgress", function(params) {
+      let maxWidth = 496;
+      let minWidth = 20;
+      let widthFactor = params.iterations/params.total;
+      let width = Math.max(minWidth,maxWidth * widthFactor);
+      document.getElementById('bar').style.width = width + 'px';
+      document.getElementById('text').innerHTML = Math.round(widthFactor*100) + '%';
+    });
+    this.network.once("stabilizationIterationsDone", function() {
+        document.getElementById('text').innerHTML = '100%';
+        document.getElementById('bar').style.width = '496px';
+        document.getElementById('loadingBar').style.opacity = '0';
+        // really clean the dom element
+        setTimeout(function () {document.getElementById('loadingBar').style.display = 'none';}, 500);
+    });
+
+
   }
 }
       
