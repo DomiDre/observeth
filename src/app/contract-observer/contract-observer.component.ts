@@ -191,7 +191,8 @@ export class ContractObserverComponent implements OnInit {
         color: {inherit: 'from'},
         smooth: {
           type: 'continuous'
-        }
+        },
+        arrows: 'to'
       },
       physics: true,
       interaction: {
