@@ -332,11 +332,11 @@ export class ContractObserverComponent implements OnInit {
     
 
     this.network.on("stabilizationProgress", function(params) {
-      let maxWidth = 496;
-      let minWidth = 20;
+      let maxWidth = 100;
+      let minWidth = 0;
       let widthFactor = params.iterations/params.total;
       let width = Math.max(minWidth,maxWidth * widthFactor);
-      document.getElementById('bar').style.width = width + 'px';
+      document.getElementById('bar').style.width = width + '%';
       document.getElementById('loading_progress_text').innerHTML = Math.round(widthFactor*100) + '%';
     });
     this.network.once("stabilizationIterationsDone", function() {
