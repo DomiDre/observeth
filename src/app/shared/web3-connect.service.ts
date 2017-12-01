@@ -6,7 +6,7 @@ declare global {
   interface Window { web3: any; }
 }
 
-window.web3 = window.web3 || {};
+window.web3 = window.web3 || undefined;
 
 @Injectable()
 export class Web3ConnectService {
@@ -16,22 +16,24 @@ export class Web3ConnectService {
   constructor() {}
 
   connectToNode(): void { 
-      console.log('Connecting to web3...')
-      if (typeof this._web3 !== 'undefined') {
+      console.log('Connecting to Web3...')
+      if (typeof this._web3 !== 'undefined') { // if already defined -> ok.
         this.web3 = new this.Web3(this.web3.currentProvider);
       } 
-      else if (typeof window.web3 !== 'undefined') {
-        console.log('Connecting to metamask web3.')
-        this.web3 = new Web3(window.web3.currentProvider);
+      else if (typeof window.web3 !== 'undefined') { // use injected web3 provider from browser
+        console.log('Connecting to Metamask.', window.web3)
+        this.web3 = new this.Web3(window.web3.currentProvider);
       }
       else {
+        console.log('Metamask was not found. Trying to connect to localhost:8545');
+        this.web3 = new this.Web3(new this.Web3.providers.HttpProvider('http://localhost:8545'));
         // use websocket provider. Run geth with: geth --syncmode "light" --ws --wsorigins "*" --rpc
         // this.web3 = new this.Web3('ws://localhost:8546');
 
         // Connect using web3 0.20.2
-        console.log('Connecting to Infura.')
-        this.web3 = new this.Web3(
-          new this.Web3.providers.HttpProvider('https://mainnet.infura.io/506w9CbDQR8fULSDR7H0'));
+        // console.log('Connecting to Infura.')
+        // this.web3 = new this.Web3(
+        //   new this.Web3.providers.HttpProvider('https://mainnet.infura.io/506w9CbDQR8fULSDR7H0'));
       }
       //console.log('Web3 version:', this.web3.version);
       console.log('Web3 version:', this.web3.version.api);
@@ -50,6 +52,11 @@ export class Web3ConnectService {
  
   get Web3(): any {
       return Web3;
+  }
+
+  isConnected(): boolean {
+    // 0.20.2 method
+    return this.web3.isConnected((error, result) => result);
   }
 }
 

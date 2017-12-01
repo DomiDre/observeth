@@ -5,11 +5,11 @@ import * as vis from 'vis';
 import { ERC20_abi } from '../shared/erc20'
 
 @Component({
-  selector: 'app-contract-observer',
-  templateUrl: './contract-observer.component.html',
-  styleUrls: ['./contract-observer.component.css']
+  selector: 'app-token-observer',
+  templateUrl: './token-observer.component.html',
+  styleUrls: ['./token-observer.component.css']
 })
-export class ContractObserverComponent implements OnInit {
+export class TokenObserverComponent implements OnInit {
 
   @Input() public tokenContractAddress: string='0x8f8221afbb33998d8584a2b05749ba73c37a938a';
 

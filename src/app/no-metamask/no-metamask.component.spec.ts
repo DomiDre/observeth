@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ContractObserverComponent } from './contract-observer.component';
+import { NoMetamaskComponent } from './no-metamask.component';
 
-describe('ContractObserverComponent', () => {
-  let component: ContractObserverComponent;
-  let fixture: ComponentFixture<ContractObserverComponent>;
+describe('NoMetamaskComponent', () => {
+  let component: NoMetamaskComponent;
+  let fixture: ComponentFixture<NoMetamaskComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ContractObserverComponent ]
+      declarations: [ NoMetamaskComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ContractObserverComponent);
+    fixture = TestBed.createComponent(NoMetamaskComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

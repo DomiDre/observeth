@@ -1,38 +1,6 @@
 <div>
-  <p>Live Ethereum Blockchain Watching</p>
-</div>
-<div *ngIf='block_number'>
-  <p>Current Blocknumber: {{block_number}}</p> 
-</div>
-<div *ngIf='connected_account'>
-  <p>Connected with account: {{connected_account}}</p> 
-</div>
-
-<div>
-  <p> <u> Filters</u> </p>
-    <p>Minimum Value: <input [(ngModel)]=filterMinValue 
-                       placeholder="Minimum Transacted Value"
-                       (change)="updateDisplayData()"> Ξ</p>
-    <p>Minimum GasPrice: <input [(ngModel)]=filterMinGasPrice 
-                       placeholder="Minimum Gas Price"
-                       (change)="updateDisplayData()"> GWei</p>
-
-</div>
-<br>
-<div *ngIf='current_block && filtered_transactions.length > 0'>
-  <p><u>Block Details</u></p> 
-    <ul>
-      <li *ngFor="let tx of filtered_transactions">
-        {{tx.hash}} <a target="_blank" 
-                      href='https://etherscan.io/tx/{{tx.hash}}'><i class="fa fa-external-link"></i></a>
-        <ul>
-          <li>From: {{tx.from}}</li>
-          <li>To: {{tx.to}}</li>
-          <li>Value: {{tx.value/1e18}} Ξ</li>
-          <li>Gas: {{tx.gas}}  </li>
-          <li>GasPrice: {{tx.gasPrice/1e9}} GWei </li>
-          <li>Gas paid: {{tx.gasPrice*tx.gas/1e18}} Ξ </li>
-        </ul>
-      </li>
-    </ul>
+  <h2>To him that watches, everything is revealed.</h2>
+  <p>You found the place, where we take the Ethereum blockchain data, 
+    filter it for our interests, and visualize the information to learn from it.</p>
+  <p>In case the information you found here has been useful to you, consider donating server costs and finance the implementation of further analysis methods.</p>
 </div>
