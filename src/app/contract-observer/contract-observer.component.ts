@@ -2,6 +2,7 @@ import { Component, OnInit, Input, NgZone, ElementRef } from '@angular/core';
 import { Web3ConnectService } from '../shared/web3-connect.service';
 import { TXData } from '../shared/txData';
 import * as vis from 'vis';
+import { ERC20_abi } from '../shared/erc20'
 
 @Component({
   selector: 'app-contract-observer',
@@ -21,6 +22,10 @@ export class ContractObserverComponent implements OnInit {
   private processingBlockNumber: number;
   private current_subscription: any;
   private network: any;
+  
+  private ERC20_contract: any;
+  private TokenTotalSupply: number;
+  private TokenDecimals: number;
 
   @Input() private progress: number;
 
@@ -29,6 +34,7 @@ export class ContractObserverComponent implements OnInit {
               private element: ElementRef) { }
 
   ngOnInit() {
+
   }
 
   updateData(): void {
@@ -36,12 +42,22 @@ export class ContractObserverComponent implements OnInit {
     this.loadingProcessing = true;
     this.progress = 0;
 
+
     document.getElementById('loadingBar').style.display = 'block';
     document.getElementById('loadingBar').style.opacity = '10';
-    document.getElementById('text').innerHTML = '0%';
+    document.getElementById('loading_progress_text').innerHTML = '0%';
+    document.getElementById('loadingBar_header_text').innerHTML = 'Fetching Data from Ethereum Blockchain.';
     document.getElementById('bar').style.width = '0px';
 
     // Web3 0.20.2
+    this.ERC20_contract = this.web3service.web3.eth.contract(ERC20_abi)
+                         .at(this.tokenContractAddress);    
+    this.ERC20_contract.decimals((error, result) => 
+      this.TokenDecimals = this.web3service.web3.toDecimal(result));
+ 
+    this.ERC20_contract.totalSupply((error, result) => 
+      this.TokenTotalSupply = this.web3service.web3.toDecimal(result));
+ 
     this.web3service.web3.eth.getBlockNumber(
       (error, blocknumber) => {
       this.updateFirstAndLastBlockNumber(blocknumber);
@@ -50,49 +66,21 @@ export class ContractObserverComponent implements OnInit {
         toBlock: this.latestBlockNumber,
         address: this.tokenContractAddress
       })
-      .get((error, logs) => this.evaluateLogs0_20(logs, 
-        () => {
-          this.makeMindmap();
-          this.loadingProcessing = false;
-        })
-      )
+      .get((error, logs) => {
+        this.evaluateLogs0_20(logs, 
+          () => {
+            this.initMindmap();
+            this.loadingProcessing = false;
+          })
+      })
     });
-
-
-      // , (error, txData) => {
-      //   if(!error) {
-      //     let methodId = txData.topics['0'];
-      //     if (methodId === TransferHex) { // transfer: 1 transfers to 2 
-      //       let txEntry = new TXData();
-      //       txEntry.hash = txData.transactionHash;
-      //       // check 1e18 factor
-      //       txEntry.value = this.web3service.web3.toDecimal(txData.data)/1e18;
-      //       txEntry.from = this.removeLeadingZeros0_20(txData.topics['1']);
-      //       txEntry.to = this.removeLeadingZeros0_20(txData.topics['2']);
-      //       this.transactionList.push(txEntry);
-      //     } else if (methodId == ApproveHex) { // approve: you allowed somebody else to withdraw from your account
-      //       // not implemented yet
-      //     } else {
-      //       console.log(methodId,' not known, check ', txData.transactionHash,'. Please report this.');
-      //     }
-      //     this.processingBlockNumber = txData.blockNumber;     
-      //   }})
-    // });
-
-
-
-
-    // .then(logs => this.evaluateLogs(logs))
-    // .then(() => this.makeMindmap())
-    // .then(() => this.loadingProcessing=false);
-
-    
+  
     // Web3 1.0
     // this.web3service.web3.eth.getBlockNumber() // gets the latest block number
     // .then(blocknumber => this.updateFirstAndLastBlockNumber(blocknumber))
     // .then(() => this.getLogs())
     // .then(logs => this.evaluateLogs(logs))
-    // .then(() => this.makeMindmap())
+    // .then(() => this.initMindmap())
     // .then(() => this.loadingProcessing=false);
   }
 
@@ -119,10 +107,10 @@ export class ContractObserverComponent implements OnInit {
       if (methodId === TransferHex) { // transfer: 1 transfers to 2 
         let txEntry = new TXData();
         txEntry.hash = txData.transactionHash;
-        // check 1e18 factor
-        txEntry.value = this.web3service.web3.toDecimal(txData.data)/1e18;
-        txEntry.from = txData.topics['1'].replace(/0x0*/,'0x');
-        txEntry.to = txData.topics['2'].replace(/0x0*/,'0x');
+        
+        txEntry.value = this.web3service.web3.toDecimal(txData.data);
+        txEntry.from = this.removeLeadingZeros0_20(txData.topics['1']);
+        txEntry.to = this.removeLeadingZeros0_20(txData.topics['2']);
         this.transactionList.push(txEntry);
       } else if (methodId == ApproveHex) { // approve: you allowed somebody else to withdraw from your account
         // not implemented yet
@@ -130,8 +118,14 @@ export class ContractObserverComponent implements OnInit {
         console.log(methodId,' not known, check ', txData.transactionHash,'. Please report this.');
       }
       this.processingBlockNumber = txData.blockNumber;
-      callback();
     }
+    callback();
+  }
+
+  removeLeadingZeros0_20(data): string {
+    let cleaned_string = data.replace(/0x0*/,'0x');
+    while(cleaned_string.length < 42) cleaned_string = cleaned_string.replace('0x', '0x0')
+    return cleaned_string;
   }
 
   removeLeadingZeros(data): string {
@@ -154,7 +148,7 @@ export class ContractObserverComponent implements OnInit {
         let txEntry = new TXData();
         txEntry.hash = txData.transactionHash;
         // check 1e18 factor
-        txEntry.value = this.web3service.web3.utils.hexToNumberString(txData.data)/1e18;
+        txEntry.value = this.web3service.web3.utils.hexToNumberString(txData.data);
         txEntry.from = this.removeLeadingZeros(txData.topics['1']);
         txEntry.to = this.removeLeadingZeros(txData.topics['2']);
         this.transactionList.push(txEntry);
@@ -168,7 +162,8 @@ export class ContractObserverComponent implements OnInit {
   }
 
 
-  makeMindmap(): void {
+  initMindmap(): void {
+    document.getElementById('loadingBar_header_text').innerHTML = 'Sorting nodes and edges.';
     let nodeList = new Array();
     let edgeList = new Array();
 
@@ -182,6 +177,7 @@ export class ContractObserverComponent implements OnInit {
       let tx_from: string = txData.from;
       let tx_to: string = txData.to;
       let tx_value: number = txData.value;
+      let tx_hash: string = txData.hash;
 
       let idx_check_from = nodeList.indexOf(tx_from);
       let idx_check_to = nodeList.indexOf(tx_to);
@@ -202,21 +198,61 @@ export class ContractObserverComponent implements OnInit {
         id_running++;
       }
 
-      edgeList.push({from: id_from, to: id_to, title: 'Value: ' + tx_value});
-
-      
-
+      edgeList.push({
+        from: id_from, 
+        to: id_to,
+        label: tx_hash.slice(0,8),
+        title: 'TX: '+ tx_hash + '<br>'+
+               'Value: ' + tx_value/(10**this.TokenDecimals),
+        width: this.getEdgeSize(tx_value),
+        url:  'https://etherscan.io/tx/'+tx_hash
+      });
     }
+
+    document.getElementById('loadingBar_header_text').innerHTML = 'Getting Ether and Token balances.';
+    let nodes_remaining = nodeList.length;
     for(let i=0; i<nodeList.length; i++) {
-      /// CONTINUE HERE
-      nodeArray.push({
-        id: i+1,
-        label: nodeList[i].slice(0, 8),
-        size: 10,
-        url: 'https://etherscan.io/address/'+nodeList[i],
-        title: 'Wallet: '+ nodeList[i]
-      })
+      this.ERC20_contract.balanceOf(nodeList[i],
+      (error, TokenBalance) => {
+        let tokenValue = this.web3service.web3.toDecimal(TokenBalance);
+    
+        this.web3service.web3.eth.getBalance(nodeList[i], 
+        (error, balance) => {
+          // console.log(i, error, balance);
+          let etherValue = this.web3service.web3.toDecimal(balance);
+          nodeArray.push({
+            id: i+1,
+            label: nodeList[i].slice(0, 8),
+            size: this.getNodeSize(tokenValue),
+            url: 'https://etherscan.io/address/'+nodeList[i],
+            title: 'Wallet: '+ nodeList[i] + '<br>'+
+                   'Ether Balance: ' + etherValue/1e18 + '  Ξ<br>'+
+                   'Token Balance: ' + tokenValue/(10**this.TokenDecimals)
+          })
+          --nodes_remaining;
+          // console.log(i, nodes_remaining)
+          if (nodes_remaining <= 0) this.drawMindMap(nodeArray, edgeList);
+        })
+      })     
     }
+  }
+
+  getNodeSize(balance):number {
+    if (balance > 1e-4*this.TokenTotalSupply) return 30
+    else if (balance > 1e-5*this.TokenTotalSupply) return 25
+    else if (balance > 1e-6*this.TokenTotalSupply) return 20
+    else if (balance > 1e-7*this.TokenTotalSupply) return 15
+    else return 10
+  }
+  getEdgeSize(value):number {
+    if (value > 1e-5*this.TokenTotalSupply) return 5
+    else if (value > 1e-6*this.TokenTotalSupply) return 4
+    else if (value > 1e-7*this.TokenTotalSupply) return 3
+    else if (value > 1e-8*this.TokenTotalSupply) return 2
+    else return 1
+  }
+  drawMindMap(nodeArray, edgeList): void {
+    document.getElementById('loadingBar_header_text').innerHTML = 'Drawing Mindmap';
 
     let container = document.getElementById('TokenMindmap');
     // Create a DataSet (allows two way data-binding)
@@ -230,7 +266,7 @@ export class ContractObserverComponent implements OnInit {
     // Configuration for the Timeline
     let options = {
       nodes: {
-        shape: 'dot',
+        shape: 'diamond',
         scaling: {
           min: 10,
           max: 30,
@@ -244,6 +280,18 @@ export class ContractObserverComponent implements OnInit {
         font: {
           size: 12,
           face: 'Tahoma'
+        },
+        color: {
+          border: '#474747',
+          background: '#5E5E5E',
+          hover: {
+            border:'#000000',
+            background: '#ACACAC'
+          },
+          highlight: {
+            border:'#000000',
+            background: '#ACACAC'
+          }
         }
       },
       edges: {
@@ -252,7 +300,8 @@ export class ContractObserverComponent implements OnInit {
         smooth: {
           type: 'continuous'
         },
-        arrows: 'to'
+        arrows: 'to',
+        arrowStrikethrough: false
       },
       physics: true,
       interaction: {
@@ -266,12 +315,18 @@ export class ContractObserverComponent implements OnInit {
     // Create a Timeline
     this.network = new vis.Network(container, data, options);
     
-    this.network.on("selectNode", params => {
-        if (params.nodes.length === 1) {
-            let node = nodes.get(params.nodes[0]);
-            window.open(node.url, '_blank');
-        }
-    });
+    this.network.on("click", params => {
+      if (params.nodes.length === 0 && params.edges.length > 0) {
+        let edge = edges.get(params.edges[0]);
+        window.open(edge.url, '_blank');
+      }
+      else if (params.nodes.length === 1) {
+          let node = nodes.get(params.nodes[0]);
+          window.open(node.url, '_blank');
+      }
+
+    })
+    
 
     this.network.on("stabilizationProgress", function(params) {
       let maxWidth = 496;
@@ -279,10 +334,10 @@ export class ContractObserverComponent implements OnInit {
       let widthFactor = params.iterations/params.total;
       let width = Math.max(minWidth,maxWidth * widthFactor);
       document.getElementById('bar').style.width = width + 'px';
-      document.getElementById('text').innerHTML = Math.round(widthFactor*100) + '%';
+      document.getElementById('loading_progress_text').innerHTML = Math.round(widthFactor*100) + '%';
     });
     this.network.once("stabilizationIterationsDone", function() {
-        document.getElementById('text').innerHTML = '100%';
+        document.getElementById('loading_progress_text').innerHTML = '100%';
         document.getElementById('bar').style.width = '496px';
         document.getElementById('loadingBar').style.opacity = '0';
         // really clean the dom element

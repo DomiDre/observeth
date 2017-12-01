@@ -1,15 +1,24 @@
-<div>
-  Token Contract: 
-  <input [(ngModel)]=tokenContractAddress 
-         placeholder="Token Contract Address">
+<div class='container'>
+  <div class='row'>
+    <div class='col-sm-5'>
+      <div>
+        Token Contract: 
+        <input [(ngModel)]=tokenContractAddress 
+               placeholder="Token Contract Address">
+      </div>
+    </div>
+    <div class='col-sm-5'>
+      <div>
+        Get data from X last blocks: 
+        <input [(ngModel)]=numBlocks 
+               placeholder="Get data from last X blocks">
+      </div>
+    </div>
+    <div class='col-sm-2'>
+      <button (click)='updateData()'>Load Data</button>
+    </div>
+  </div>
 </div>
-<div>
-  Get data from X last blocks: 
-  <input [(ngModel)]=numBlocks 
-         placeholder="Get data from last X blocks">
-</div>
-
-<button (click)='updateData()'>Load Data</button>
 <!-- <div *ngIf="loadingProcessing">
   Loading Data...
   <div class="progress">
@@ -39,14 +48,15 @@
     </ul>
 </div> -->
 <!-- <div class= -->
-<div class='col-sm-11'>
+<div class='col-sm-12'>
+  <div id="TokenMindmap"></div>
   <div id="loadingBar">
+    <div id='loadingBar_header_text'></div>
     <div class="outerBorder">
-        <div id="text">0%</div>
-        <div id="border">
-            <div id="bar"></div>
-        </div>
+      <div id="loading_progress_text">0%</div>
+      <div id="border">
+          <div id="bar"></div>
+      </div>
     </div>
   </div>
-  <p id="TokenMindmap"></p>
 </div>
