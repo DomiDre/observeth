@@ -11,9 +11,9 @@ import { ERC20_abi } from '../shared/erc20'
 })
 export class ContractObserverComponent implements OnInit {
 
-  @Input() private tokenContractAddress: string='0x8f8221afbb33998d8584a2b05749ba73c37a938a';
+  @Input() public tokenContractAddress: string='0x8f8221afbb33998d8584a2b05749ba73c37a938a';
 
-  @Input() private numBlocks: number=100;
+  @Input() public numBlocks: number=100;
   private transactionList: Array<TXData>;
 
   private firstBlockNumber: number=1;

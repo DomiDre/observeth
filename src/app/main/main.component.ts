@@ -9,15 +9,14 @@ import { Web3ConnectService } from '../shared/web3-connect.service';
 })
 export class MainComponent implements OnInit {
 
-  private connected_account: string;
-  private block_number: any;
+  public connected_account: string;
+  public block_number: any;
+  public filtered_transactions: Array<any>;
+  public filterMinValue: number = 0;
+  public filterMinGasPrice: number = 0;
+
+  public current_block: any;
   
-  private current_block: any;
-
-  private filtered_transactions: Array<any>;
-  private filterMinValue: number = 0;
-  private filterMinGasPrice: number = 0;
-
   constructor(private zone: NgZone,
               private web3service: Web3ConnectService) { }
 
