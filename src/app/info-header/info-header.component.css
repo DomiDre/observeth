@@ -1,0 +1,16 @@
+#logo {
+    width: 64px;
+    height: 64px;
+}
+#jumbo {
+    padding: 2em;
+}
+#proverb {
+  width: 50%;
+  height: 50%;
+  overflow: auto;
+  margin: auto;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  /* font-size: 1em; */
+}

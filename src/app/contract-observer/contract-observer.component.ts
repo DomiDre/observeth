@@ -241,19 +241,19 @@ export class ContractObserverComponent implements OnInit {
   }
 
   getNodeSize(balance):number {
-    if (balance > 1e-4*this.TokenTotalSupply) return 25
-    else if (balance > 1e-5*this.TokenTotalSupply) return 20
-    else if (balance > 1e-6*this.TokenTotalSupply) return 15
-    else if (balance > 1e-7*this.TokenTotalSupply) return 10
-    else return 5
+    let relative_balance: number = balance / this.TokenTotalSupply;
+    if (relative_balance > 1e-4) return 25
+    else if (1e-7 > relative_balance) return 5
+    else return (relative_balance - 1e-7) * (25-5)/(1e-4 - 1e-7) + 5
   }
+
   getEdgeSize(value):number {
-    if (value > 1e-5*this.TokenTotalSupply) return 2.5
-    else if (value > 1e-6*this.TokenTotalSupply) return 2
-    else if (value > 1e-7*this.TokenTotalSupply) return 1.5
-    else if (value > 1e-8*this.TokenTotalSupply) return 1
-    else return 0.5
+    let relative_value: number = value / this.TokenTotalSupply;
+    if (relative_value > 1e-5) return 2.5
+    else if (1e-8 > relative_value) return 0.5
+    else return (relative_value - 1e-8) * (2.5-0.5)/(1e-5 - 1e-8) + 0.5
   }
+
   drawMindMap(nodeArray, edgeList): void {
     document.getElementById('loadingBar_header_text').innerHTML = 'Drawing Mindmap';
 
@@ -285,15 +285,15 @@ export class ContractObserverComponent implements OnInit {
           face: 'Tahoma'
         },
         color: {
-          border: '#474747',
-          background: '#5E5E5E',
+          background: '#62688f',
+          border: '#454a75',
           hover: {
-            border:'#000000',
-            background: '#ACACAC'
+            border:'#62688f',
+            background: '#8a92b2'
           },
           highlight: {
-            border:'#000000',
-            background: '#ACACAC'
+            border:'#62688f',
+            background: '#8a92b2'
           }
         }
       },
@@ -308,7 +308,7 @@ export class ContractObserverComponent implements OnInit {
       },
       physics: true,
       interaction: {
-        dragNodes: false,
+        dragNodes: true,
         tooltipDelay: 200,
         hover: true
       }
