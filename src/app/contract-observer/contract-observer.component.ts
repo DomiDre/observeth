@@ -26,6 +26,7 @@ export class ContractObserverComponent implements OnInit {
   private ERC20_contract: any;
   private TokenTotalSupply: number;
   private TokenDecimals: number;
+  private TokenSymbol: string;
 
   @Input() private progress: number;
 
@@ -55,9 +56,12 @@ export class ContractObserverComponent implements OnInit {
     this.ERC20_contract.decimals((error, result) => 
       this.TokenDecimals = this.web3service.web3.toDecimal(result));
  
+    this.ERC20_contract.symbol((error, result) => 
+      this.TokenSymbol = result);
+
     this.ERC20_contract.totalSupply((error, result) => 
       this.TokenTotalSupply = this.web3service.web3.toDecimal(result));
- 
+    
     this.web3service.web3.eth.getBlockNumber(
       (error, blocknumber) => {
       this.updateFirstAndLastBlockNumber(blocknumber);
@@ -203,7 +207,7 @@ export class ContractObserverComponent implements OnInit {
         to: id_to,
         label: tx_hash.slice(0,8),
         title: 'TX: '+ tx_hash + '<br>'+
-               'Value: ' + tx_value/(10**this.TokenDecimals),
+               'Value: ' + tx_value/(10**this.TokenDecimals) + ' ' + this.TokenSymbol,
         width: this.getEdgeSize(tx_value),
         url:  'https://etherscan.io/tx/'+tx_hash
       });
@@ -227,7 +231,7 @@ export class ContractObserverComponent implements OnInit {
             url: 'https://etherscan.io/address/'+nodeList[i],
             title: 'Wallet: '+ nodeList[i] + '<br>'+
                    'Ether Balance: ' + etherValue/1e18 + '  Ξ<br>'+
-                   'Token Balance: ' + tokenValue/(10**this.TokenDecimals)
+                   'Token Balance: ' + tokenValue/(10**this.TokenDecimals) + ' ' + this.TokenSymbol
           })
           --nodes_remaining;
           // console.log(i, nodes_remaining)
