@@ -35,7 +35,6 @@ export class ContractObserverComponent implements OnInit {
               private element: ElementRef) { }
 
   ngOnInit() {
-
   }
 
   updateData(): void {
@@ -242,18 +241,18 @@ export class ContractObserverComponent implements OnInit {
   }
 
   getNodeSize(balance):number {
-    if (balance > 1e-4*this.TokenTotalSupply) return 30
-    else if (balance > 1e-5*this.TokenTotalSupply) return 25
-    else if (balance > 1e-6*this.TokenTotalSupply) return 20
-    else if (balance > 1e-7*this.TokenTotalSupply) return 15
-    else return 10
+    if (balance > 1e-4*this.TokenTotalSupply) return 25
+    else if (balance > 1e-5*this.TokenTotalSupply) return 20
+    else if (balance > 1e-6*this.TokenTotalSupply) return 15
+    else if (balance > 1e-7*this.TokenTotalSupply) return 10
+    else return 5
   }
   getEdgeSize(value):number {
-    if (value > 1e-5*this.TokenTotalSupply) return 5
-    else if (value > 1e-6*this.TokenTotalSupply) return 4
-    else if (value > 1e-7*this.TokenTotalSupply) return 3
-    else if (value > 1e-8*this.TokenTotalSupply) return 2
-    else return 1
+    if (value > 1e-5*this.TokenTotalSupply) return 2.5
+    else if (value > 1e-6*this.TokenTotalSupply) return 2
+    else if (value > 1e-7*this.TokenTotalSupply) return 1.5
+    else if (value > 1e-8*this.TokenTotalSupply) return 1
+    else return 0.5
   }
   drawMindMap(nodeArray, edgeList): void {
     document.getElementById('loadingBar_header_text').innerHTML = 'Drawing Mindmap';
@@ -273,7 +272,7 @@ export class ContractObserverComponent implements OnInit {
         shape: 'diamond',
         scaling: {
           min: 10,
-          max: 30,
+          max: 25,
           label: {
             min: 8,
             max: 30,
@@ -342,7 +341,7 @@ export class ContractObserverComponent implements OnInit {
     });
     this.network.once("stabilizationIterationsDone", function() {
         document.getElementById('loading_progress_text').innerHTML = '100%';
-        document.getElementById('bar').style.width = '496px';
+        document.getElementById('bar').style.width = '100%';
         document.getElementById('loadingBar').style.opacity = '0';
         // really clean the dom element
         setTimeout(function () {document.getElementById('loadingBar').style.display = 'none';}, 500);

@@ -19,6 +19,7 @@
     -o-transition: all 0.5s ease;
     transition: all 0.5s ease;
     opacity:1;
+    display: none;
 }
 #wrapper {
     position:relative;
@@ -37,10 +38,10 @@
 }
 #loadingBar_header_text {
     position:relative;
-    top:0px;
-    left:0px;
+    top:100%;
+    left:0em;
     width:100%;
-    height:0px;
+    height:0em;
     /* margin:auto auto auto auto; */
     font-size:22px;
     color: #000000;
@@ -84,4 +85,5 @@ div.outerBorder {
     border:0.5em solid rgba(30,30,30,0.05);
     background: rgb(0, 173, 246); /* Old browsers */
     box-shadow: 0.5em 0em 1em rgba(0,0,0,0.4);
+    
 }
