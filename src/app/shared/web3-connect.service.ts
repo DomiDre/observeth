@@ -21,7 +21,7 @@ export class Web3ConnectService {
         this.web3 = new this.Web3(this.web3.currentProvider);
       } 
       else if (typeof window.web3 !== 'undefined') { // use injected web3 provider from browser
-        console.log('Connecting to Metamask.', window.web3)
+        console.log('Connecting to Metamask.')
         this.web3 = new this.Web3(window.web3.currentProvider);
       }
       else {
