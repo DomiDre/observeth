@@ -3,7 +3,8 @@ import { TimerObservable } from 'rxjs/observable/TimerObservable';
 import { Web3ConnectService } from '../shared/web3-connect.service';
 import { Router } from '@angular/router';
 import { Filters } from './filters'
-import * as vis from 'vis';
+
+import { Mindmap } from '../shared/mindmap';
 
 @Component({
   selector: 'app-live-ethereum-observer',
@@ -25,8 +26,7 @@ export class LiveEthereumObserverComponent implements OnInit {
 
   public currentFilterSelection:string='';
 
-  public network:any;
-  public MindMapContainer: any;
+  public mindmap: Mindmap;
 
   constructor(private zone: NgZone,
               private web3service: Web3ConnectService,
@@ -35,7 +35,7 @@ export class LiveEthereumObserverComponent implements OnInit {
 
   ngOnInit() {
     this.filterPlaceholder = this.filters[this.currentFilterSelection].title;
-    this.MindMapContainer = document.getElementById('Mindmap');
+    this.mindmap = new Mindmap(this.web3service);
 
     if (!this.web3service.isConnected()) this.router.navigateByUrl('/NoMetamask');
     else this.initializeDataCollection()
@@ -105,80 +105,13 @@ export class LiveEthereumObserverComponent implements OnInit {
           this.filtered_transactions.push(tx);
       }
     });
-    this.initMindmap();
-  }
-
-
-
-
-  initMindmap(): void {
-    // document.getElementById('loadingBar_header_text').innerHTML = 'Sorting nodes and edges.';
-    let nodeList = new Array();
-    let edgeList = new Array();
-
-    let nodeArray = new Array();
-
-    let id_running: number = 1;
-    let id_from: number;
-    let id_to: number;
-    for(let txData of this.filtered_transactions){
-      let tx_from: string = txData.from;
-      let tx_to: string = txData.to;
-      let tx_value: number = this.web3service.web3.toDecimal(txData.value);
-      let tx_hash: string = txData.hash;
-
-      let idx_check_from = nodeList.indexOf(tx_from);
-      let idx_check_to = nodeList.indexOf(tx_to);
-
-      if (idx_check_from > -1) { // from is already in nodeList
-        id_from = idx_check_from+1;
-      } else {
-        id_from = id_running;
-        nodeList.push(tx_from);
-        id_running++;
-      }
-      
-      if (idx_check_to > -1) { // from is already in nodeList
-        id_to = idx_check_to+1;
-      } else {
-        id_to = id_running;
-        nodeList.push(tx_to);
-        id_running++;
-      }
-
-      edgeList.push({
-        from: id_from, 
-        to: id_to,
-        label: tx_hash.slice(0,8),
-        title: 'TX: '+ tx_hash + '<br>'+
-               'Value: ' + tx_value/1e18 + ' Ξ',
-        width: this.getEdgeSize(tx_value),
-        url:  'https://etherscan.io/tx/'+tx_hash
-      });
-    }
-
-    // document.getElementById('loadingBar_header_text').innerHTML = 'Getting Ether and Token balances.';
-    let nodes_remaining = nodeList.length;
-    
-    for(let i=0; i<nodeList.length; i++) {
-      this.web3service.web3.eth.getBalance(nodeList[i], 
-      (error, balance) => {
-        // console.log(i, error, balance);
-        // console.log(nodeList[i])
-        let etherValue = this.web3service.web3.toDecimal(balance);
-        nodeArray.push({
-          id: i+1,
-          label: nodeList[i].slice(0, 8),
-          size: this.getNodeSize(balance),
-          url: 'https://etherscan.io/address/'+nodeList[i],
-          title: 'Wallet: '+ nodeList[i] + '<br>'+
-                 'Ether Balance: ' + etherValue/1e18 + '  Ξ'
-        })
-        --nodes_remaining;
-        // console.log(i, nodes_remaining)
-        if (nodes_remaining <= 0) this.drawMindMap(nodeArray, edgeList);
-      })     
-    }
+    this.mindmap.initMindmapFromTxList(
+      this.filtered_transactions, 
+      this.getNodeSize, 
+      this.getEdgeSize)
+    .then(() => {
+      this.mindmap.drawMindMap(this.mindmap.nodes, this.mindmap.edges)
+    });
   }
 
   getNodeSize(balance):number {
@@ -195,103 +128,6 @@ export class LiveEthereumObserverComponent implements OnInit {
     else return (relative_value - 1e-8) * (2.5-0.5)/(1e-5 - 1e-8) + 0.5
   }
 
-  drawMindMap(nodeArray, edgeList): void {
-    // document.getElementById('loadingBar_header_text').innerHTML = 'Drawing Mindmap';
-    
-    // Create a DataSet (allows two way data-binding)
-    let nodes = new vis.DataSet(nodeArray)
-    //         // create an array with edges
-    let edges = new vis.DataSet(edgeList);
-      let data = {
-          nodes: nodes,
-          edges: edges
-        };
-    // Configuration for the Timeline
-    let options = {
-      nodes: {
-        shape: 'diamond',
-        scaling: {
-          min: 10,
-          max: 25,
-          label: {
-            min: 8,
-            max: 30,
-            drawThreshold: 12,
-            maxVisible: 20
-          }
-        },
-        font: {
-          size: 12,
-          face: 'Tahoma'
-        },
-        color: {
-          background: '#62688f',
-          border: '#454a75',
-          hover: {
-            border:'#62688f',
-            background: '#8a92b2'
-          },
-          highlight: {
-            border:'#62688f',
-            background: '#8a92b2'
-          }
-        }
-      },
-      edges: {
-        width: 0.15,
-        color: {inherit: 'from'},
-        smooth: {
-          type: 'continuous'
-        },
-        arrows: 'to',
-        arrowStrikethrough: false
-      },
-      physics: true,
-      layout: {
-        improvedLayout: false
-      },
-      interaction: {
-        dragNodes: true,
-        tooltipDelay: 200,
-        hover: true
-      }
-    };
-
-    // console.log(container)
-    // Create a Timeline
-    this.network = new vis.Network(this.MindMapContainer, data, options);
-    
-    this.network.on("click", params => {
-      if (params.nodes.length === 0 && params.edges.length > 0) {
-        let edge = edges.get(params.edges[0]);
-        window.open(edge.url, '_blank');
-      }
-      else if (params.nodes.length === 1) {
-          let node = nodes.get(params.nodes[0]);
-          window.open(node.url, '_blank');
-      }
-
-    })
-    
-
-    // this.network.on("stabilizationProgress", function(params) {
-    //   let maxWidth = 100;
-    //   let minWidth = 0;
-    //   let widthFactor = params.iterations/params.total;
-    //   let width = Math.max(minWidth,maxWidth * widthFactor);
-    //   document.getElementById('bar').style.width = width + '%';
-    //   document.getElementById('loading_progress_text').innerHTML = Math.round(widthFactor*100) + '%';
-    // });
-    // this.network.once("stabilizationIterationsDone", function() {
-    //     document.getElementById('loading_progress_text').innerHTML = '100%';
-    //     document.getElementById('bar').style.width = '100%';
-    //     document.getElementById('loadingBar').style.opacity = '0';
-    //     // really clean the dom element
-    //     setTimeout(function () {document.getElementById('loadingBar').style.display = 'none';}, 500);
-    // });
-
-
-  }
 }
 
 

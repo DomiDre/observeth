@@ -2,7 +2,7 @@ import { OnInit, ElementRef } from '@angular/core';
 import { Web3ConnectService } from '../shared/web3-connect.service';
 import * as vis from 'vis';
 
-export class Mindmap implements OnInit {
+export class Mindmap {
 
   public container: any;
   public network: any;
@@ -13,15 +13,14 @@ export class Mindmap implements OnInit {
 
   public status: string = '';
 
-  constructor(private web3service: Web3ConnectService) {}
-
-  ngOnInit() {
+  constructor(private web3service: Web3ConnectService) {
     this.container = document.getElementById('Mindmap');
   }
 
   initMindmapFromTxList(txList: Array<any>,
-                        NodeSizeEstimator: (value: number) => number,
-                        EdgeSizeEstimator: (value: number) => number): Promise<any> {
+    NodeSizeEstimator: (value: number) => number,
+    EdgeSizeEstimator: (value: number) => number): Promise<any> {
+
     this.nodes = new Array();
     this.edges = new Array();
     this.nodeAddressList = new Array();
@@ -72,7 +71,6 @@ export class Mindmap implements OnInit {
     }
 
     // get the Balance of all nodes
-    
     let promisesBalance = []
     for(let i=0; i<this.nodeAddressList.length; i++) {
       promisesBalance.push(
