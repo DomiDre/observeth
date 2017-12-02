@@ -1,6 +1,18 @@
-<div class='container'>
+<div class='header'>
+  <h2>Token Observer</h2>
+  <p>View the historical transactions of the ERC20 token of your choice</p>
+</div>
+
+
+<div id="loading">
+  <div id='loading_info_text'></div>
+  <div id="loading_progress_text">0%</div>
+</div>
+<div id="TokenMindmap"></div>
+
+<div class='footer'>
   <div class='row'>
-    <div class='col-sm-5'>
+    <div class='col-sm-6'>
       <div>
         Token Contract: 
         <input [(ngModel)]=tokenContractAddress 
@@ -14,27 +26,8 @@
                placeholder="Get data from last X blocks">
       </div>
     </div>
-    <div class='col-sm-2'>
-      <button (click)='updateData()'>Load Data</button>
+    <div class='col-sm-1'>
+      <button (click)='updateData()'>Get</button>
     </div>
-  </div>
-</div>
-
-<div class='row' id='MindmapRow'>
-  <div class='col-sm-10'>
-    <div id="TokenMindmap"></div>
-    <div id="loadingBar">
-      <div id='loadingBar_header_text'></div>
-      <div class="outerBorder">
-        <div id="border">
-            <div id="bar">
-              <div id="loading_progress_text">0%</div>
-            </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class='col-sm-2'>
-    Statistics
   </div>
 </div>

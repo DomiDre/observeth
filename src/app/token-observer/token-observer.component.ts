@@ -35,6 +35,7 @@ export class TokenObserverComponent implements OnInit {
               private element: ElementRef) { }
 
   ngOnInit() {
+    document.getElementById('loading').style.display = 'none';
   }
 
   updateData(): void {
@@ -43,11 +44,10 @@ export class TokenObserverComponent implements OnInit {
     this.progress = 0;
 
 
-    document.getElementById('loadingBar').style.display = 'block';
-    document.getElementById('loadingBar').style.opacity = '10';
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('loading').style.opacity = '10';
     document.getElementById('loading_progress_text').innerHTML = '0%';
-    document.getElementById('loadingBar_header_text').innerHTML = 'Fetching Data from Ethereum Blockchain.';
-    document.getElementById('bar').style.width = '0px';
+    document.getElementById('loading_info_text').innerHTML = 'Fetching Data from Ethereum Blockchain.';
 
     // Web3 0.20.2
     this.ERC20_contract = this.web3service.web3.eth.contract(ERC20_abi)
@@ -166,7 +166,7 @@ export class TokenObserverComponent implements OnInit {
 
 
   initMindmap(): void {
-    document.getElementById('loadingBar_header_text').innerHTML = 'Sorting nodes and edges.';
+    document.getElementById('loading_info_text').innerHTML = 'Sorting nodes and edges.';
     let nodeList = new Array();
     let edgeList = new Array();
 
@@ -212,7 +212,7 @@ export class TokenObserverComponent implements OnInit {
       });
     }
 
-    document.getElementById('loadingBar_header_text').innerHTML = 'Getting Ether and Token balances.';
+    document.getElementById('loading_info_text').innerHTML = 'Getting Ether and Token balances.';
     let nodes_remaining = nodeList.length;
     for(let i=0; i<nodeList.length; i++) {
       this.ERC20_contract.balanceOf(nodeList[i],
@@ -255,7 +255,7 @@ export class TokenObserverComponent implements OnInit {
   }
 
   drawMindMap(nodeArray, edgeList): void {
-    document.getElementById('loadingBar_header_text').innerHTML = 'Drawing Mindmap';
+    document.getElementById('loading_info_text').innerHTML = 'Drawing Mindmap';
 
     let container = document.getElementById('TokenMindmap');
     // Create a DataSet (allows two way data-binding)
@@ -336,17 +336,15 @@ export class TokenObserverComponent implements OnInit {
       let minWidth = 0;
       let widthFactor = params.iterations/params.total;
       let width = Math.max(minWidth,maxWidth * widthFactor);
-      document.getElementById('bar').style.width = width + '%';
       document.getElementById('loading_progress_text').innerHTML = Math.round(widthFactor*100) + '%';
     });
+
     this.network.once("stabilizationIterationsDone", function() {
         document.getElementById('loading_progress_text').innerHTML = '100%';
-        document.getElementById('bar').style.width = '100%';
-        document.getElementById('loadingBar').style.opacity = '0';
+        document.getElementById('loading').style.opacity = '0';
         // really clean the dom element
-        setTimeout(function () {document.getElementById('loadingBar').style.display = 'none';}, 500);
+        setTimeout(function () {document.getElementById('loading').style.display = 'none';}, 500);
     });
-
 
   }
 }

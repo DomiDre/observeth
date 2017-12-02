@@ -1,25 +1,58 @@
-<div>
-  <p>Live Ethereum Blockchain Watching</p>
-</div>
-<div *ngIf='block_number'>
-  <p>Current Blocknumber: {{block_number}}</p> 
-</div>
-<div *ngIf='connected_account'>
-  <p>Connected with account: {{connected_account}}</p> 
+<div class='header'>
+  <h2>Live EtherWatch</h2>
+  <p>View the blockchain data in real time</p>
+  <div *ngIf='currentBlock' id='blockNumber'>
+    Current Blocknumber: {{plottedBlock}}
+  </div>
 </div>
 
-<div>
-  <p> <u> Filters</u> </p>
-    <p>Minimum Value: <input [(ngModel)]=filterMinValue 
-                       placeholder="Minimum Transacted Value"
-                       (change)="updateDisplayData()"> Ξ</p>
-    <p>Minimum GasPrice: <input [(ngModel)]=filterMinGasPrice 
-                       placeholder="Minimum Gas Price"
-                       (change)="updateDisplayData()"> GWei</p>
+<div id="DataMindmap"></div>
 
+<div class='footer'>  
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="input-group">
+        <div class="input-group-btn">
+          <button type="button" 
+                  class="btn btn-secondary dropdown-toggle" 
+                  data-toggle="dropdown" 
+                  aria-haspopup="true" 
+                  aria-expanded="false">
+            {{filterButtonLabel}}
+          </button>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" 
+              (click)="selectedFilter('MinTxVol')">
+              {{filters['MinTxVol'].title}}
+            </a>
+            <a class="dropdown-item"
+              (click)="selectedFilter('MinGasPri')">
+              {{filters['MinGasPri'].title}}
+            </a>
+            <a class="dropdown-item"
+              (click)="selectedFilter('MinGas')">
+              {{filters['MinGas'].title}}
+            </a>
+          </div>
+        </div>
+        <input type="number" class="form-control"
+               ng-model="input-number"
+               aria-label="Filter input"
+               placeholder="{{filterPlaceholder}}"
+               [(ngModel)]="filters[currentFilterSelection].value"
+               (change)="filterValueChanged(currentFilterSelection)"
+               contenteditable="true">
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div *ngFor="let filter of activeFilterList">
+        {{filter}}
+      </div>
+    </div>
+  </div>
 </div>
-<br>
-<div *ngIf='current_block && filtered_transactions.length > 0'>
+
+<!-- <div *ngIf='current_block && filtered_transactions.length > 0'>
   <p><u>Block Details</u></p> 
     <ul>
       <li *ngFor="let tx of filtered_transactions">
@@ -35,4 +68,4 @@
         </ul>
       </li>
     </ul>
-</div>
+</div> -->
