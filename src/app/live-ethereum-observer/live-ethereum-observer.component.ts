@@ -42,7 +42,7 @@ export class LiveEthereumObserverComponent implements OnInit {
   }
 
   initializeDataCollection(): void {
-    TimerObservable.create(0, 10000)
+    TimerObservable.create(0, 1000)
     .subscribe( () => this.updateBlock())
   }
 
@@ -189,7 +189,7 @@ export class LiveEthereumObserverComponent implements OnInit {
   }
 
   getEdgeSize(value):number {
-    let relative_value: number = value / 1e18/100e6;
+    let relative_value: number = value / 1e18 / 100e6;
     if (relative_value > 1e-5) return 2.5
     else if (1e-8 > relative_value) return 0.5
     else return (relative_value - 1e-8) * (2.5-0.5)/(1e-5 - 1e-8) + 0.5

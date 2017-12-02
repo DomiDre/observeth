@@ -58,6 +58,22 @@ export class Web3ConnectService {
     // 0.20.2 method
     return this.web3.isConnected((error, result) => result);
   }
+
+  toDecimal(data: any): number {
+    return this.web3.toDecimal(data); // web3 0.20.2 method
+  }
+
+  getBalance(address: string): Promise<number> {
+    return new Promise( (resolve, reject) => 
+      this.web3.eth.getBalance(address, 
+      (error, balance) => {
+        if (error) reject(error)
+        else resolve(balance)
+      })
+    )
+  }
+
+
 }
 
 
