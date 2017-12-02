@@ -35,7 +35,7 @@ export class LiveEthereumObserverComponent implements OnInit {
 
   ngOnInit() {
     this.filterPlaceholder = this.filters[this.currentFilterSelection].title;
-    this.MindMapContainer = document.getElementById('DataMindmap');
+    this.MindMapContainer = document.getElementById('Mindmap');
 
     if (!this.web3service.isConnected()) this.router.navigateByUrl('/NoMetamask');
     else this.initializeDataCollection()
@@ -189,7 +189,7 @@ export class LiveEthereumObserverComponent implements OnInit {
   }
 
   getEdgeSize(value):number {
-    let relative_value: number = value / 100e6;
+    let relative_value: number = value / 1e18/100e6;
     if (relative_value > 1e-5) return 2.5
     else if (1e-8 > relative_value) return 0.5
     else return (relative_value - 1e-8) * (2.5-0.5)/(1e-5 - 1e-8) + 0.5

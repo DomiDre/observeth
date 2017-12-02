@@ -1,4 +1,4 @@
-#TokenMindmap {
+#Mindmap {
     /* min-height:30em; */
     /* height:auto !important; */
     /* width: 100%; */
@@ -9,7 +9,7 @@
     border: 1px dashed lightgray;
 }
 
-div#TokenMindmap {
+div#Mindmap {
     width: 80%;
     margin: auto;
     margin-top:10px;

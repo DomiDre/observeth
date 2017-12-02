@@ -257,7 +257,7 @@ export class TokenObserverComponent implements OnInit {
   drawMindMap(nodeArray, edgeList): void {
     document.getElementById('loading_info_text').innerHTML = 'Drawing Mindmap';
 
-    let container = document.getElementById('TokenMindmap');
+    let container = document.getElementById('Mindmap');
     // Create a DataSet (allows two way data-binding)
     let nodes = new vis.DataSet(nodeArray)
     //         // create an array with edges

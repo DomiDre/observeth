@@ -16,6 +16,7 @@ import { Web3ConnectService } from './shared/web3-connect.service';
 import { TestpageComponent } from './testpage/testpage.component';
 import { NoMetamaskComponent } from './no-metamask/no-metamask.component';
 import { LiveEthereumObserverComponent } from './live-ethereum-observer/live-ethereum-observer.component';
+import { EtherObserverComponent } from './ether-observer/ether-observer.component';
 
 
 @NgModule({
@@ -28,7 +29,8 @@ import { LiveEthereumObserverComponent } from './live-ethereum-observer/live-eth
     AboutComponent,
     TestpageComponent,
     NoMetamaskComponent,
-    LiveEthereumObserverComponent
+    LiveEthereumObserverComponent,
+    EtherObserverComponent
   ],
   imports: [
     BrowserModule,

@@ -1,4 +1,4 @@
-#DataMindmap {
+#Mindmap {
     /* min-height:30em; */
     /* height:auto !important; */
     width: 100%;
@@ -13,7 +13,7 @@
 }
 
 
-div#DataMindmap {
+div#Mindmap {
     width: 80%;
     margin: auto;
     margin-top:10px;
