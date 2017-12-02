@@ -26,7 +26,7 @@ export class LiveEthereumObserverComponent implements OnInit {
   public currentFilterSelection:string='';
 
   public network:any;
-
+  public MindMapContainer: any;
 
   constructor(private zone: NgZone,
               private web3service: Web3ConnectService,
@@ -35,6 +35,8 @@ export class LiveEthereumObserverComponent implements OnInit {
 
   ngOnInit() {
     this.filterPlaceholder = this.filters[this.currentFilterSelection].title;
+    this.MindMapContainer = document.getElementById('DataMindmap');
+
     if (!this.web3service.isConnected()) this.router.navigateByUrl('/NoMetamask');
     else this.initializeDataCollection()
   }
@@ -51,7 +53,8 @@ export class LiveEthereumObserverComponent implements OnInit {
   }
 
   filterValueChanged(filter: string) {
-    this.filters[filter].set = (this.filters[filter].value !== this.filters[filter].defaultValue)
+    this.filters[filter].set = 
+      (this.filters[filter].value !== this.filters[filter].defaultValue)
     this.updateDisplayData()
   }
 
@@ -161,6 +164,7 @@ export class LiveEthereumObserverComponent implements OnInit {
       this.web3service.web3.eth.getBalance(nodeList[i], 
       (error, balance) => {
         // console.log(i, error, balance);
+        // console.log(nodeList[i])
         let etherValue = this.web3service.web3.toDecimal(balance);
         nodeArray.push({
           id: i+1,
@@ -193,7 +197,7 @@ export class LiveEthereumObserverComponent implements OnInit {
 
   drawMindMap(nodeArray, edgeList): void {
     // document.getElementById('loadingBar_header_text').innerHTML = 'Drawing Mindmap';
-    let container = document.getElementById('DataMindmap');
+    
     // Create a DataSet (allows two way data-binding)
     let nodes = new vis.DataSet(nodeArray)
     //         // create an array with edges
@@ -243,6 +247,9 @@ export class LiveEthereumObserverComponent implements OnInit {
         arrowStrikethrough: false
       },
       physics: true,
+      layout: {
+        improvedLayout: false
+      },
       interaction: {
         dragNodes: true,
         tooltipDelay: 200,
@@ -252,7 +259,7 @@ export class LiveEthereumObserverComponent implements OnInit {
 
     // console.log(container)
     // Create a Timeline
-    this.network = new vis.Network(container, data, options);
+    this.network = new vis.Network(this.MindMapContainer, data, options);
     
     this.network.on("click", params => {
       if (params.nodes.length === 0 && params.edges.length > 0) {
