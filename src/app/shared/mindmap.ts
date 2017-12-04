@@ -8,6 +8,7 @@ export class Mindmap {
   public network: any;
 
   public nodeAddressList: Array<any>; // positions corresponds to id, value is address
+  public nodeAdjencyList: Array<any>; 
   public nodes: Array<any>; // contains all data to plot nodes
   public edges: Array<any>; // contains all data to plot edges
 
@@ -23,9 +24,11 @@ export class Mindmap {
 
     this.nodes = new Array();
     this.edges = new Array();
-    this.nodeAddressList = new Array();
 
-    let id_running: number = 1;
+    this.nodeAddressList = new Array();
+    this.nodeAdjencyList = new Array();
+
+    let id_running: number = 0;
     let id_from: number;
     let id_to: number;
 
@@ -36,25 +39,29 @@ export class Mindmap {
       let tx_value: number = this.web3service.toDecimal(txData.value);
       let tx_hash: string = txData.hash;
 
+      if (tx_to === null) { // contract creation ?
+        tx_to = tx_from}; 
+
       // check whether from or to are already in List
       let idx_check_from = this.nodeAddressList.indexOf(tx_from);
-      let idx_check_to = this.nodeAddressList.indexOf(tx_to);
-
       // is to already in this.nodeAddressList ? otherwise its -1
       if (idx_check_from > -1) { 
-        id_from = idx_check_from+1;
+        id_from = idx_check_from;
       } else {
         id_from = id_running;
         this.nodeAddressList.push(tx_from);
+        this.nodeAdjencyList.push([])
         id_running++;
       }
       
+      let idx_check_to = this.nodeAddressList.indexOf(tx_to);
       // is from already in this.nodeAddressList ? otherwise its -1
       if (idx_check_to > -1) { 
-        id_to = idx_check_to+1;
+        id_to = idx_check_to;
       } else {
         id_to = id_running;
         this.nodeAddressList.push(tx_to);
+        this.nodeAdjencyList.push([])
         id_running++;
       }
 
@@ -68,23 +75,28 @@ export class Mindmap {
         width: EdgeSizeEstimator(tx_value),
         url:  'https://etherscan.io/tx/'+tx_hash
       });
+      this.nodeAdjencyList[id_from].push(id_to)
     }
 
     // get the Balance of all nodes
     let promisesBalance = []
     for(let i=0; i<this.nodeAddressList.length; i++) {
+      // console.log(this.nodeAddressList[i]);
       promisesBalance.push(
         this.web3service.getBalance(this.nodeAddressList[i])
         .then((balance) => {
           let etherValue = this.web3service.toDecimal(balance);
           this.nodes.push({
-            id: i+1,
+            id: i,
             label: this.nodeAddressList[i].slice(0, 8),
             size: NodeSizeEstimator(balance),
             url: 'https://etherscan.io/address/'+this.nodeAddressList[i],
             title: 'Wallet: '+ this.nodeAddressList[i] + '<br>'+
                    'Ether Balance: ' + etherValue/1e18 + '  Ξ'
           })
+        })
+        .catch(error => {
+          console.log(error, 'Error with node ', this.nodeAddressList[i])
         })
       )
     }

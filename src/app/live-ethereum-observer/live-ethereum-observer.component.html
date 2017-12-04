@@ -2,7 +2,10 @@
   <h2>Live EtherWatch</h2>
   <p>View the blockchain data in real time</p>
   <div *ngIf='currentBlock' id='blockNumber'>
-    Current Blocknumber: {{plottedBlock}}
+    Current Blocknumber: {{plottedBlock}} 
+     <a target="_blank" 
+                      href='https://etherscan.io/txs?block={{plottedBlock}}'><i class="fa fa-external-link"></i></a>
+
   </div>
 </div>
 
