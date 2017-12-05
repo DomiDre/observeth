@@ -1,0 +1,3 @@
+#Run ./compile.sh to compile solidity code.
+#solidity_clean is go script explained in ./test_contracts/go/ which transfers solc output to a .js readable - format
+#Run loadScript('deploy.js') in geth to deploy contract

@@ -1,0 +1,8 @@
+#After running compile.sh of contracts, just use deploy.js in geth to deploy contract.
+
+#For example run
+testrpc
+geth attach rpc:http://localhost:8545
+
+#And run in geth console:
+loadScript('deploy.js')

@@ -1,0 +1,9 @@
+#Simple script to read abi and bin from file created by solc --bin --abi
+#And to copy it to a .js readable format.
+#Just copy solidity_clean to $GOPATH/src/
+#Go into the folder and run 
+go build solidity_clean.go
+#and 
+go install
+#which should move solidity_clean to your $GOPATH/bin folder
+#$GOPATH/go/bin should be in your $PATH and thus solidity_clean callable from bash
