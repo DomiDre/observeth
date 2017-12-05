@@ -7,11 +7,12 @@ import { Particle } from '../shared/particle';
   styleUrls: ['./main.component.css']
 })
 export class MainComponent implements OnInit {
-  particle: object = {};
+  public particle: Particle;
   
   constructor() { }
 
   ngOnInit() {
-    this.particle = new Particle().getOptions();
+    this.particle = new Particle();
+    this.particle.setDefaultLayout();
   }
 }

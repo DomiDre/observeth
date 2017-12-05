@@ -7,11 +7,12 @@ import { Particle } from '../shared/particle';
   styleUrls: ['./no-metamask.component.css']
 })
 export class NoMetamaskComponent implements OnInit {
-  particle: object = {};
+  public particle: Particle;
   
   constructor() { }
 
   ngOnInit() {
-    this.particle = new Particle().getOptionsError();
+    this.particle = new Particle();
+    this.particle.setErrorLayout();
   }
 }

@@ -30,6 +30,8 @@ export class LiveEthereumObserverComponent implements OnInit {
 
   public isLiveUpdating: boolean;
 
+  public timer: any;
+
   constructor(private zone: NgZone,
               private web3service: Web3ConnectService,
               private router: Router,
@@ -45,7 +47,7 @@ export class LiveEthereumObserverComponent implements OnInit {
   }
 
   initializeDataCollection(): void {
-    TimerObservable.create(0, 2000)
+    this.timer = TimerObservable.create(0, 2000)
     .subscribe( () => this.updateBlock())
   }
 
@@ -63,7 +65,7 @@ export class LiveEthereumObserverComponent implements OnInit {
 
   // WEB3 0.20.2:
   updateBlock(): void {
-    if(this.isLiveUpdating)
+    // if(this.isLiveUpdating)
       this.web3service.getBlockNumber()
       .then((blocknumber) => {
         if(blocknumber > this.plottedBlock) {
@@ -135,6 +137,8 @@ export class LiveEthereumObserverComponent implements OnInit {
 
   toggleFreeze(): void{
     this.isLiveUpdating = !this.isLiveUpdating;
+    if (this.isLiveUpdating) this.initializeDataCollection()
+    else this.timer.unsubscribe();
   }
 
 }
