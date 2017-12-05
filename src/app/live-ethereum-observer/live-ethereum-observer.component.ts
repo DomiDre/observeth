@@ -28,6 +28,8 @@ export class LiveEthereumObserverComponent implements OnInit {
 
   public mindmap: Mindmap;
 
+  public isLiveUpdating: boolean;
+
   constructor(private zone: NgZone,
               private web3service: Web3ConnectService,
               private router: Router,
@@ -36,13 +38,14 @@ export class LiveEthereumObserverComponent implements OnInit {
   ngOnInit() {
     this.filterPlaceholder = this.filters[this.currentFilterSelection].title;
     this.mindmap = new Mindmap(this.web3service);
+    this.isLiveUpdating = true;
 
     if (!this.web3service.isConnected()) this.router.navigateByUrl('/NoMetamask');
     else this.initializeDataCollection()
   }
 
   initializeDataCollection(): void {
-    TimerObservable.create(0, 1000)
+    TimerObservable.create(0, 2000)
     .subscribe( () => this.updateBlock())
   }
 
@@ -60,17 +63,19 @@ export class LiveEthereumObserverComponent implements OnInit {
 
   // WEB3 0.20.2:
   updateBlock(): void {
-    this.web3service.web3.eth.getBlockNumber(
-      (error, blocknumber) => {
-        if (blocknumber > this.plottedBlock) {
+    if(this.isLiveUpdating)
+      this.web3service.getBlockNumber()
+      .then((blocknumber) => {
+        if(blocknumber > this.plottedBlock) {
           this.plottedBlock = blocknumber;
-          this.web3service.web3.eth.getBlock('latest', true,
-            (error, curblock) => {this.currentBlock = curblock
-                                  this.updateDisplayData()});
+
+          this.web3service.getBlock()
+          .then((curblock) => {
+            this.currentBlock = curblock;
+            this.updateDisplayData();
+          })
         }
-      });
-
-
+      })
   }
   
   updateDisplayData(): void {
@@ -126,6 +131,10 @@ export class LiveEthereumObserverComponent implements OnInit {
     if (relative_value > 1e-5) return 2.5
     else if (1e-8 > relative_value) return 0.5
     else return (relative_value - 1e-8) * (2.5-0.5)/(1e-5 - 1e-8) + 0.5
+  }
+
+  toggleFreeze(): void{
+    this.isLiveUpdating = !this.isLiveUpdating;
   }
 
 }

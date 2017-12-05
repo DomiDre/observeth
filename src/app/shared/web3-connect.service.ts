@@ -73,7 +73,27 @@ export class Web3ConnectService {
     )
   }
 
+  getBlockNumber(): Promise<number> {
+    return new Promise( (resolve, reject ) =>
+      this.web3.eth.getBlockNumber( // web3 0.20.2 method
+      (error, blocknumber) => {
+        if (error) reject(error)
+        else resolve(blocknumber)
+      })
+    )
+  }
 
+  getBlock(blocknumber?:any): Promise<any> {
+    return new Promise( (resolve, reject) => {
+      if(!blocknumber) blocknumber = 'latest';
+
+      this.web3.eth.getBlock(blocknumber, true, //web3 0.20.2 method
+      (error, block) => {
+        if(error) reject(error)
+        else resolve(block)
+      }) 
+    })
+  }
 }
 
 

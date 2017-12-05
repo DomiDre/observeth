@@ -32,3 +32,24 @@ input.form-control {
     border-bottom: 1px solid black;
     box-sizing: border-box;
 }
+
+
+/* .button {
+    background-color: #868e96;
+    border: none;
+    color: white;
+    padding: 10px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    -webkit-transition-duration: 0.4s; 
+    transition-duration: 0.4s;
+    cursor: pointer;
+} */
+/* 
+.button:hover {
+    background-color: #495057;
+    color: white;
+} */

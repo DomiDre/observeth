@@ -13,7 +13,17 @@
 
 <div class='footer'>  
   <div class="row">
-    <div class="col-sm-6">
+
+    <div class="col-sm-1">
+      <div class="input-group-btn">
+        <button *ngIf="isLiveUpdating" type="button" class="btn btn-secondary"
+                (click)="toggleFreeze()">Freeze</button>
+        <button *ngIf="!isLiveUpdating" type="button" class="btn btn-secondary"
+                (click)="toggleFreeze()">Unfreeze</button>
+      </div>
+
+    </div>
+    <div class="col-sm-5">
       <div class="input-group">
         <div class="input-group-btn">
           <button type="button" 
