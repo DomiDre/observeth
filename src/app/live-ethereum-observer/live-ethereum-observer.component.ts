@@ -39,7 +39,8 @@ export class LiveEthereumObserverComponent implements OnInit {
 
   ngOnInit() {
     this.filterPlaceholder = this.filters[this.currentFilterSelection].title;
-    this.mindmap = new Mindmap(this.web3service);
+    this.mindmap = new Mindmap(this.zone, this.web3service);
+    this.mindmap.coin_supply = 96178066; // don't hardcode this
     this.isLiveUpdating = true;
 
     if (!this.web3service.isConnected()) this.router.navigateByUrl('/NoMetamask');
@@ -63,9 +64,7 @@ export class LiveEthereumObserverComponent implements OnInit {
     this.updateDisplayData()
   }
 
-  // WEB3 0.20.2:
   updateBlock(): void {
-    // if(this.isLiveUpdating)
       this.web3service.getBlockNumber()
       .then((blocknumber) => {
         if(blocknumber > this.plottedBlock) {
@@ -82,6 +81,7 @@ export class LiveEthereumObserverComponent implements OnInit {
   
   updateDisplayData(): void {
     this.zone.run(() => {
+      this.mindmap.in_loading_status = true;
       this.filtered_transactions = new Array<any>();
       this.activeFilterList = new Array<string>();
 
@@ -112,27 +112,10 @@ export class LiveEthereumObserverComponent implements OnInit {
           this.filtered_transactions.push(tx);
       }
     });
-    this.mindmap.initMindmapFromTxList(
-      this.filtered_transactions, 
-      this.getNodeSize, 
-      this.getEdgeSize)
+    this.mindmap.initMindmapFromTxList(this.filtered_transactions)
     .then(() => {
       this.mindmap.drawMindMap(this.mindmap.nodes, this.mindmap.edges)
     });
-  }
-
-  getNodeSize(balance):number {
-    let relative_balance: number = balance / 1e18/100e6;
-    if (relative_balance > 1e-4) return 25
-    else if (1e-7 > relative_balance) return 5
-    else return (relative_balance - 1e-7) * (25-5)/(1e-4 - 1e-7) + 5
-  }
-
-  getEdgeSize(value):number {
-    let relative_value: number = value / 1e18 / 100e6;
-    if (relative_value > 1e-5) return 2.5
-    else if (1e-8 > relative_value) return 0.5
-    else return (relative_value - 1e-8) * (2.5-0.5)/(1e-5 - 1e-8) + 0.5
   }
 
   toggleFreeze(): void{
@@ -142,22 +125,3 @@ export class LiveEthereumObserverComponent implements OnInit {
   }
 
 }
-
-
-
-
-
-
-
-  // WEB3 1.0:
-  // updateBlock(): void {
-  //   this.web3service.web3.eth.getAccounts()
-  //     .then(accounts => this.connected_account = accounts[0]);
-  
-  //   this.web3service.web3.eth.getBlockNumber()
-  //     .then(blocknumber =>this.block_number = blocknumber);
-
-  //   this.web3service.web3.eth.getBlock('latest', true)
-  //     .then(curblock => this.currentBlock = curblock)
-  //     .then(() =>  this.updateDisplayData());
-  // }

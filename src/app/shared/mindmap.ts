@@ -1,4 +1,4 @@
-import { OnInit, ElementRef } from '@angular/core';
+import { OnInit, ElementRef, NgZone } from '@angular/core';
 import { Web3ConnectService } from '../shared/web3-connect.service';
 import * as vis from 'vis';
 
@@ -13,15 +13,34 @@ export class Mindmap {
   public edges: Array<any>; // contains all data to plot edges
 
   public status: string = '';
+  public in_loading_status = false;
 
-  constructor(private web3service: Web3ConnectService) {
+  public coin_supply: number = 1;
+
+  constructor(private zone: NgZone,
+              private web3service: Web3ConnectService) {
     this.container = document.getElementById('Mindmap');
   }
 
-  initMindmapFromTxList(txList: Array<any>,
-    NodeSizeEstimator: (value: number) => number,
-    EdgeSizeEstimator: (value: number) => number): Promise<any> {
+  getNodeSize(value): number {
+    let relative_value: number = value / this.coin_supply;
+    if (relative_value > 1e-4) return 25
+    else if (1e-7 > relative_value) return 5
+    else return (relative_value - 1e-7) * (25-5)/(1e-4 - 1e-7) + 5
+  }
 
+  getEdgeSize(value): number {
+    let relative_value: number = value / this.coin_supply;
+    if (relative_value > 1e-5) return 2.5
+    else if (1e-8 > relative_value) return 0.5
+    else return (relative_value - 1e-8) * (2.5-0.5)/(1e-5 - 1e-8) + 0.5
+  }
+  
+  initMindmapFromTxList(txList: Array<any>): Promise<any> {
+
+    this.in_loading_status = true;
+    this.status = 'Reading TX List';
+    
     this.nodes = new Array();
     this.edges = new Array();
 
@@ -72,7 +91,7 @@ export class Mindmap {
         label: tx_hash.slice(0,8),
         title: 'TX: '+ tx_hash + '<br>'+
                'Value: ' + tx_value/1e18 + ' Ξ',
-        width: EdgeSizeEstimator(tx_value),
+        width: this.getEdgeSize(tx_value),
         url:  'https://etherscan.io/tx/'+tx_hash
       });
       this.nodeAdjencyList[id_from].push(id_to)
@@ -80,6 +99,7 @@ export class Mindmap {
 
     // get the Balance of all nodes
     let promisesBalance = []
+    this.status = 'Fetching Node Balances'
     for(let i=0; i<this.nodeAddressList.length; i++) {
       // console.log(this.nodeAddressList[i]);
       promisesBalance.push(
@@ -89,7 +109,7 @@ export class Mindmap {
           this.nodes.push({
             id: i,
             label: this.nodeAddressList[i].slice(0, 8),
-            size: NodeSizeEstimator(balance),
+            size: this.getNodeSize(balance),
             url: 'https://etherscan.io/address/'+this.nodeAddressList[i],
             title: 'Wallet: '+ this.nodeAddressList[i] + '<br>'+
                    'Ether Balance: ' + etherValue/1e18 + '  Ξ'
@@ -106,6 +126,7 @@ export class Mindmap {
 
   drawMindMap(nodeList, edgeList): void {
     this.status = 'Drawing Mindmap';
+    this.in_loading_status = true;
     let nodes = new vis.DataSet(nodeList)
     let edges = new vis.DataSet(edgeList);
     let data = {
@@ -176,5 +197,24 @@ export class Mindmap {
           window.open(node.url, '_blank');
       }
     })
+
+    this.network.once("stabilizationIterationsDone", 
+      () => {
+        this.zone.run(() => {
+          this.status = '';
+          this.in_loading_status = false;
+        })
+      }
+    );
+
   }
+
+  //   this.network.on("stabilizationProgress", function(params) {
+  //     let maxWidth = 100;
+  //     let minWidth = 0;
+  //     let widthFactor = params.iterations/params.total;
+  //     let width = Math.max(minWidth,maxWidth * widthFactor);
+  //     document.getElementById('loading_progress_text').innerHTML = Math.round(widthFactor*100) + '%';
+  //   });
+
 }

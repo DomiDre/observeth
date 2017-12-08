@@ -9,7 +9,13 @@
   </div>
 </div>
 
-<div id="Mindmap"></div>
+<div id="container_mindmap">
+  <div id="Mindmap"></div>
+  <div id="loading" *ngIf="mindmap.in_loading_status">
+    <div id='loading_info_text'>{{mindmap.status}}</div>
+    <div class="loader"></div> 
+  </div>
+</div>
 
 <div class='footer'>  
   <div class="row">

@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { ERC20_abi } from '../shared/erc20'
 
 import Web3 from 'web3';
 
@@ -94,6 +95,29 @@ export class Web3ConnectService {
       }) 
     })
   }
+
+  getERC20Contract(contractAddress): any {
+    return this.web3.eth.contract(ERC20_abi).at(contractAddress)
+  }
+
+  getERC20info(erc20contract_function): Promise<any> {
+    return new Promise( (resolve, reject) => {
+      erc20contract_function((error, result) => {
+          if(error) reject(error)
+          else resolve(result)
+      })
+    })
+  }
+
+  getERC20details(erc20contract): Promise<any> {
+    let decimals = this.getERC20info(erc20contract.decimals);
+    let symbol = this.getERC20info(erc20contract.symbol);
+    let totalSupply = this.getERC20info(erc20contract.totalSupply);
+
+    return Promise.all([decimals, symbol, totalSupply])
+  }
+
+
 }
 
 

@@ -4,11 +4,13 @@
 </div>
 
 
-<div id="loading">
-  <div id='loading_info_text'></div>
-  <div id="loading_progress_text">0%</div>
+<div id="container_mindmap">
+  <div id="Mindmap"></div>
+  <div id="loading" *ngIf="mindmap.in_loading_status">
+    <div id='loading_info_text'>{{mindmap.status}}</div>
+    <div class="loader"></div> 
+  </div>
 </div>
-<div id="Mindmap"></div>
 
 <div class='footer'>
   <div class='row'>
@@ -27,7 +29,10 @@
       </div>
     </div>
     <div class='col-sm-1'>
-      <button (click)='updateData()'>Get</button>
+      <div class="input-group-btn">
+        <button type="button" class="btn btn-secondary"
+                (click)='updateData()'>Get</button>
+      </div>
     </div>
   </div>
 </div>
