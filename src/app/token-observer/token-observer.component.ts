@@ -1,5 +1,6 @@
 import { Component, OnInit, Input, NgZone, ElementRef } from '@angular/core';
 import { Web3ConnectService } from '../shared/web3-connect.service';
+import { TxTreaterService } from '../shared/tx-treater.service';
 import { TXData } from '../shared/txData';
 import * as vis from 'vis';
 import { ERC20_abi } from '../shared/erc20'
@@ -32,10 +33,11 @@ export class TokenObserverComponent implements OnInit {
 
   constructor(private zone: NgZone,
               private web3service: Web3ConnectService,
+              private txtreaterService: TxTreaterService,
               private element: ElementRef) { }
 
   ngOnInit() {
-    this.mindmap = new Mindmap(this.zone, this.web3service);
+    this.mindmap = new Mindmap(this.zone, this.web3service, this.txtreaterService);
   }
 
   updateData(): void {
@@ -51,7 +53,7 @@ export class TokenObserverComponent implements OnInit {
       this.TokenSymbol = data[1];
       this.TokenTotalSupply = data[2];
 
-      this.mindmap.coin_supply = this.TokenTotalSupply;
+      this.txtreaterService.coin_supply = this.TokenTotalSupply;
     }).then( () => {
       this.web3service.getBlockNumber()
       .then((blocknumber ) =>  {
@@ -69,8 +71,7 @@ export class TokenObserverComponent implements OnInit {
               this.mindmap.initMindmapFromTxList(this.transactionList)
               .then(() => 
                 this.zone.run(() => 
-                this.mindmap.drawMindMap(this.mindmap.nodes, 
-                                         this.mindmap.edges)
+                this.mindmap.drawMindMap()
                 )
               )
 

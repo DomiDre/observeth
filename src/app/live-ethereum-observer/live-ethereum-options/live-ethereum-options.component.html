@@ -1,0 +1,40 @@
+<p-sidebar [(visible)]="display" (onHide)="hidingSidebar()" styleClass='ui-sidebar-md'>
+  <div *ngIf="filtersService && filtersService.availableFilters">
+    <h2 style="text-align:left;"> Filters </h2>
+    <div class="input-group">
+      <div class="input-group-btn">
+        <button type="button" 
+                class="btn btn-secondary dropdown-toggle" 
+                data-toggle="dropdown" 
+                aria-haspopup="true" 
+                aria-expanded="false"
+                pTooltip="Select a filter and set its value.">
+        </button>
+         <div class="dropdown-menu">
+          <a *ngFor="let filterName of filtersService.availableFilters" 
+            class="dropdown-item" 
+            (click)="selectedFilter(filterName)">
+            {{filtersService.filters[filterName].title}}
+          </a>
+        </div>
+      </div> 
+      <input type="number" class="form-control"
+             ng-model="input-number"
+             aria-label="Filter input"
+             placeholder="{{filterPlaceholder}}"
+             [(ngModel)]="filtersService.filters[currentFilterSelection].value"
+             (change)="filterValueChanged(currentFilterSelection)"
+             contenteditable="true">
+    </div>
+    <div *ngIf="selectedFilterString">
+      Selected filter: {{selectedFilterString}}
+     </div>
+    <br>
+    <div *ngIf="filtersService.activeFilterList && filtersService.activeFilterList.length > 0">
+      <h4 style="text=align:left;"> Active Filters </h4>
+      <div *ngFor="let filter of filtersService.activeFilterList">
+        {{filter}}
+      </div>
+    </div> 
+  </div>
+</p-sidebar>

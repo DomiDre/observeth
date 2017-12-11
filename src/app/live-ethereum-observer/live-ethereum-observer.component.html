@@ -7,11 +7,15 @@
                       href='https://etherscan.io/txs?block={{plottedBlock}}'><i class="fa fa-external-link"></i></a>
 
   </div>
+  <div *ngIf='!currentBlock' id='blockNumber'>
+    Getting current blocknumber...
+  </div>
 </div>
 
 <div id="container_mindmap">
   <div id="Mindmap"></div>
   <div id="loading" *ngIf="mindmap.in_loading_status">
+    <div id='loading_info_text'>{{txtreaterService.status}}</div>
     <div id='loading_info_text'>{{mindmap.status}}</div>
     <div class="loader"></div> 
   </div>
@@ -19,7 +23,13 @@
 
 <div class='footer'>  
   <div class="row">
-
+    <div class="col-sm-1">
+      <div class="input-group-btn">
+        <button type="button" class="btn btn-secondary"
+                (click)="toggleOptions()">Options</button>
+      </div>
+    </div>
+    <div class="col-sm-10"></div>
     <div class="col-sm-1">
       <div class="input-group-btn">
         <button *ngIf="isLiveUpdating" type="button" class="btn btn-secondary"
@@ -28,63 +38,9 @@
                 (click)="toggleFreeze()">Unfreeze</button>
       </div>
     </div>
-    
-    <div class="col-sm-5">
-      <div class="input-group">
-        <div class="input-group-btn">
-          <button type="button" 
-                  class="btn btn-secondary dropdown-toggle" 
-                  data-toggle="dropdown" 
-                  aria-haspopup="true" 
-                  aria-expanded="false">
-            {{filterButtonLabel}}
-          </button>
-          <div class="dropdown-menu">
-            <a class="dropdown-item" 
-              (click)="selectedFilter('MinTxVol')">
-              {{filters['MinTxVol'].title}}
-            </a>
-            <a class="dropdown-item"
-              (click)="selectedFilter('MinGasPri')">
-              {{filters['MinGasPri'].title}}
-            </a>
-            <a class="dropdown-item"
-              (click)="selectedFilter('MinGas')">
-              {{filters['MinGas'].title}}
-            </a>
-          </div>
-        </div>
-        <input type="number" class="form-control"
-               ng-model="input-number"
-               aria-label="Filter input"
-               placeholder="{{filterPlaceholder}}"
-               [(ngModel)]="filters[currentFilterSelection].value"
-               (change)="filterValueChanged(currentFilterSelection)"
-               contenteditable="true">
-      </div>
-    </div>
-    <div class="col-sm-6">
-      <div *ngFor="let filter of activeFilterList">
-        {{filter}}
-      </div>
-    </div>
   </div>
 </div>
 
-<!-- <div *ngIf='current_block && filtered_transactions.length > 0'>
-  <p><u>Block Details</u></p> 
-    <ul>
-      <li *ngFor="let tx of filtered_transactions">
-        {{tx.hash}} <a target="_blank" 
-                      href='https://etherscan.io/tx/{{tx.hash}}'><i class="fa fa-external-link"></i></a>
-        <ul>
-          <li>From: {{tx.from}}</li>
-          <li>To: {{tx.to}}</li>
-          <li>Value: {{tx.value/1e18}} Ξ</li>
-          <li>Gas: {{tx.gas}}  </li>
-          <li>GasPrice: {{tx.gasPrice/1e9}} GWei </li>
-          <li>Gas paid: {{tx.gasPrice*tx.gas/1e18}} Ξ </li>
-        </ul>
-      </li>
-    </ul>
-</div> -->
+<app-live-ethereum-options 
+  [display]="displayOptions" 
+  (sidebar_hidden)="toggleOptions()"></app-live-ethereum-options>
