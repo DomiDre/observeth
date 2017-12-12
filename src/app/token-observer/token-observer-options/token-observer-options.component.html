@@ -1,0 +1,34 @@
+<p-dialog header='Options' [(visible)]='display' [width]=420>
+  <div><h2 style="text-align: left;">Select Token</h2></div>
+  <span *ngFor="let token of tokens">
+    <a (click)='setTokenContractAdress(token)'>
+      <img src='assets/erc20_logos/{{token.logo}}'>
+    </a>
+  </span>
+  <span>
+    <a (click)='setTokenContractAdress()'>
+      Custom
+    </a>
+  </span>
+  <div>
+  <input id='TokenAdress' [(ngModel)]=tokenContractAddress 
+           placeholder="Token Contract Address">
+  </div>
+  <div *ngIf="selectedToken">
+    Selected Token: {{selectedToken.name}}
+  </div>
+  <br>
+  <div><h2 style="text-align: left;">Select Range of Blocks</h2></div>
+  <div style='text-align:center;' *ngIf="fromBlock">
+    <input class='BlockNumberInput' [(ngModel)]=fromBlock 
+           placeholder="From">
+     - 
+    <input class='BlockNumberInput' [(ngModel)]=toBlock 
+           placeholder="To">
+
+  </div>
+  <p-footer>
+    <button type="button" pButton icon="fa-check" (click)="getData()" label="Get"></button>
+  </p-footer>
+</p-dialog>
+

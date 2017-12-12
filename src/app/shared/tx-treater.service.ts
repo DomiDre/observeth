@@ -110,7 +110,6 @@ export class TxTreaterService {
     this.nodes = [];
     for(let i=0; i<nodeIdList.length; i++){
       let node_id: number = nodeIdList[i];
-      console.log(i, nodeIdList[i], this.nodeBalanceList[node_id], this.nodeAddressList[node_id]);
       this.nodes.push({
         id: nodeIdList[i],
         label: this.nodeAddressList[node_id].slice(0, 8),

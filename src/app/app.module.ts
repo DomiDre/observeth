@@ -21,7 +21,8 @@ import { EtherObserverComponent } from './ether-observer/ether-observer.componen
 import { LiveEthereumOptionsComponent } from './live-ethereum-observer/live-ethereum-options/live-ethereum-options.component';
 
 import { Web3ConnectService } from './shared/web3-connect.service';
-import { TxTreaterService } from './shared/tx-treater.service'
+import { TxTreaterService } from './shared/tx-treater.service';
+import { TokenObserverOptionsComponent } from './token-observer/token-observer-options/token-observer-options.component'
 
 @NgModule({
   declarations: [
@@ -35,7 +36,8 @@ import { TxTreaterService } from './shared/tx-treater.service'
     NoMetamaskComponent,
     LiveEthereumObserverComponent,
     EtherObserverComponent,
-    LiveEthereumOptionsComponent
+    LiveEthereumOptionsComponent,
+    TokenObserverOptionsComponent
   ],
   imports: [
     BrowserModule,

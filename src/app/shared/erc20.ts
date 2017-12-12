@@ -3,19 +3,19 @@ export var ERC20_tokens: any = [
     "name": 'Request Network',
     "symbol": "REQ",
     "address": '0x8f8221afbb33998d8584a2b05749ba73c37a938a',
-    "logo": "https://etherscan.io/token/images/request_28.png"
+    "logo": "request.png"
   },
   {
     "name": 'AirSwap',
     "symbol": "AST",
     "address": '0x27054b13b1b798b345b591a4d22e6562d47ea75a',
-    "logo": "https://etherscan.io/token/images/airswap_28.png"
+    "logo": "airswap.png"
   },
   {
     "name": 'KyberNetwork',
     "symbol": "KNC",
     "address": '0xdd974d5c2e2928dea5f71b9825b8b646686bd200',
-    "logo": "https://etherscan.io/token/images/kyber28.png"
+    "logo": "kyber.png"
   }
 ]
 

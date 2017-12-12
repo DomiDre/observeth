@@ -14,25 +14,14 @@
 
 <div class='footer'>
   <div class='row'>
-    <div class='col-sm-6'>
-      <div>
-        Token Contract: 
-        <input [(ngModel)]=tokenContractAddress 
-               placeholder="Token Contract Address">
-      </div>
-    </div>
-    <div class='col-sm-5'>
-      <div>
-        Get data from X last blocks: 
-        <input [(ngModel)]=numBlocks 
-               placeholder="Get data from last X blocks">
-      </div>
-    </div>
-    <div class='col-sm-1'>
+
+    <div class="col-sm-1">
       <div class="input-group-btn">
         <button type="button" class="btn btn-secondary"
-                (click)='updateData()'>Get</button>
+                (click)="toggleOptions()">Options</button>
       </div>
     </div>
   </div>
 </div>
+
+<app-token-observer-options></app-token-observer-options>

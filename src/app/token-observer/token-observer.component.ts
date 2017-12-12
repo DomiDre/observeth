@@ -1,26 +1,29 @@
-import { Component, OnInit, Input, NgZone, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, NgZone, ElementRef } from '@angular/core';
 import { Web3ConnectService } from '../shared/web3-connect.service';
 import { TxTreaterService } from '../shared/tx-treater.service';
 import { TXData } from '../shared/txData';
 import * as vis from 'vis';
 import { ERC20_abi } from '../shared/erc20'
-
+import { OptionsService } from './options.service'
 import { Mindmap } from '../shared/mindmap';
+import { Subscription } from 'rxjs/Subscription';
 
 @Component({
   selector: 'app-token-observer',
   templateUrl: './token-observer.component.html',
-  styleUrls: ['./token-observer.component.css']
+  styleUrls: ['./token-observer.component.css'],
+  providers: [ OptionsService ]
 })
-export class TokenObserverComponent implements OnInit {
+export class TokenObserverComponent implements OnInit, OnDestroy {
 
-  @Input() public tokenContractAddress: string='0x8f8221afbb33998d8584a2b05749ba73c37a938a';
   @Input() public numBlocks: number=100;
 
   private transactionList: Array<TXData>;
 
-  private firstBlockNumber: number=1;
-  private latestBlockNumber: number=1;
+  private tokenContractAddress: string;
+  private firstBlockNumber: number;
+  private latestBlockNumber: number;
+
   private processingBlockNumber: number;
   
   public mindmap: Mindmap;
@@ -30,14 +33,27 @@ export class TokenObserverComponent implements OnInit {
   private TokenDecimals: number;
   private TokenSymbol: string;
 
+  private subscription: Subscription;
 
   constructor(private zone: NgZone,
               private web3service: Web3ConnectService,
               private txtreaterService: TxTreaterService,
-              private element: ElementRef) { }
+              private element: ElementRef,
+              private optionService: OptionsService) { }
 
   ngOnInit() {
+    this.subscription = this.optionService.connectObservable()
+                        .subscribe((data) => {
+                          this.tokenContractAddress = data.contractAddress;
+                          this.firstBlockNumber = data.from;
+                          this.latestBlockNumber = data.to;
+                          this.updateData();
+                        });
     this.mindmap = new Mindmap(this.zone, this.web3service, this.txtreaterService);
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   updateData(): void {
@@ -55,37 +71,37 @@ export class TokenObserverComponent implements OnInit {
 
       this.txtreaterService.coin_supply = this.TokenTotalSupply;
     }).then( () => {
-      this.web3service.getBlockNumber()
-      .then((blocknumber ) =>  {
-        this.updateFirstAndLastBlockNumber(blocknumber);
-        this.mindmap.status = 'Getting logs between block ' + 
-          this.firstBlockNumber + ' and ' + this.latestBlockNumber;
-        this.web3service.web3.eth.filter({
-          fromBlock: this.firstBlockNumber,
-          toBlock: this.latestBlockNumber,
-          address: this.tokenContractAddress
-        })
-        .get((error, logs) => {
-          this.evaluateLogs0_20(logs, 
-            () => {
-              this.mindmap.initMindmapFromTxList(this.transactionList)
-              .then(() => 
-                this.zone.run(() => 
-                this.mindmap.drawMindMap()
-                )
-              )
-
-            })
+    // () => {
+      // this.web3service.getBlockNumber()
+      // .then((blocknumber ) =>  {
+        // this.updateFirstAndLastBlockNumber(blocknumber);
+      this.mindmap.status = 'Getting logs between block ' + 
+        this.firstBlockNumber + ' and ' + this.latestBlockNumber;
+      this.web3service.web3.eth.filter({
+        fromBlock: this.firstBlockNumber,
+        toBlock: this.latestBlockNumber,
+        address: this.tokenContractAddress
+      })
+      .get((error, logs) => {
+        this.evaluateLogs0_20(logs, 
+        () => {
+          this.mindmap.initMindmapFromTxList(this.transactionList)
+          .then(() => 
+            this.zone.run(() => 
+            this.mindmap.drawMindMap()
+            )
+          )
         })
       })
     })
   }
+    // })
 
-  updateFirstAndLastBlockNumber(blocknumber): void {
-      this.latestBlockNumber = blocknumber;
-      this.firstBlockNumber = blocknumber-this.numBlocks;
-      this.processingBlockNumber = this.firstBlockNumber;
-  }
+  // updateFirstAndLastBlockNumber(blocknumber): void {
+  //     this.latestBlockNumber = blocknumber;
+  //     this.firstBlockNumber = blocknumber-this.numBlocks;
+  //     this.processingBlockNumber = this.firstBlockNumber;
+  // }
 
   getLogs(): Promise<any> {
     return this.web3service.web3.eth.getPastLogs( { 
@@ -157,5 +173,10 @@ export class TokenObserverComponent implements OnInit {
       this.processingBlockNumber = txData.blockNumber;          
     }
   }
+
+  toggleOptions(): void {
+    this.optionService.openOptions();
+  }
+
 }
       
