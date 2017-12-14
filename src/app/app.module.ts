@@ -22,7 +22,9 @@ import { LiveEthereumOptionsComponent } from './live-ethereum-observer/live-ethe
 
 import { Web3ConnectService } from './shared/web3-connect.service';
 import { TxTreaterService } from './shared/tx-treater.service';
+import { RelativeDatePipe } from './shared/relative_time.pipe'
 import { TokenObserverOptionsComponent } from './token-observer/token-observer-options/token-observer-options.component'
+
 
 @NgModule({
   declarations: [
@@ -37,7 +39,8 @@ import { TokenObserverOptionsComponent } from './token-observer/token-observer-o
     LiveEthereumObserverComponent,
     EtherObserverComponent,
     LiveEthereumOptionsComponent,
-    TokenObserverOptionsComponent
+    TokenObserverOptionsComponent,
+    RelativeDatePipe
   ],
   imports: [
     BrowserModule,
