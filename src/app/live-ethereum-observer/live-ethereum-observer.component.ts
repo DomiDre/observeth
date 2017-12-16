@@ -37,7 +37,7 @@ export class LiveEthereumObserverComponent implements OnInit {
               private txtreaterService: TxTreaterService) { }
 
   ngOnInit() {
-    this.mindmap = new Mindmap(this.zone, this.web3service, this.txtreaterService);
+    this.mindmap = new Mindmap(this.zone, this.txtreaterService);
     this.txtreaterService.coin_supply = 96178066; // don't hardcode this
     this.isLiveUpdating = true;
 

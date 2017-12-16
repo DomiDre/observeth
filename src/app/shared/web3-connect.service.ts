@@ -100,7 +100,16 @@ export class Web3ConnectService {
     return this.web3.eth.contract(ERC20_abi).at(contractAddress)
   }
 
-  getERC20info(erc20contract_function): Promise<any> {
+  getERC20balance(erc20contract, nodeAdress): Promise<any> {
+    return new Promise( (resolve, reject) => {
+      erc20contract.balanceOf(nodeAdress, (error, result) => {
+          if(error) reject(error)
+          else resolve(result)
+      })
+    })
+  }
+
+  private getERC20info(erc20contract_function): Promise<any> {
     return new Promise( (resolve, reject) => {
       erc20contract_function((error, result) => {
           if(error) reject(error)

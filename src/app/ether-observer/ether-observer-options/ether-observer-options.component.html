@@ -1,32 +1,10 @@
 <p-dialog header='Options' [(visible)]='display' [width]=420>
-  <div><h2 style="text-align: left;">Select Token</h2></div>
-  <span *ngFor="let token of tokens">
-    <a (click)='setTokenContractAddress(token)'>
-      <img src='assets/erc20_logos/{{token.logo}}'>
-    </a>
-  </span>
-  <span>
-    <a (click)='setCustomTokenAddress()'>
-      Custom
-    </a>
-  </span>
-  <div>
-  <input id='TokenAdress' [(ngModel)]=tokenContractAddress 
-           placeholder="Token Contract Address" [disabled]=input_token_disabled>
-  </div>
-  <div *ngIf="selectedToken">
-    Selected Token: {{selectedToken.name}}
-  </div>
-  <div *ngIf="TokenErrorMessage">
-    {{TokenErrorMessage}}
-  </div>
-  <br>
   <div><h2 style="text-align: left;">Select Range of Blocks</h2></div>
   <div style='text-align:center;' *ngIf="fromBlock">
     
     <div class='row' style='width:100%;'>
       <div class="col-sm-5">
-        <input class='BlockNumberInput' [(ngModel)]=fromBlock 
+        <input class='BlockNumberInput' [type]='number' [(ngModel)]=fromBlock 
            placeholder="From" style='width:100%' (ngModelChange)='setDate("from")'>
         <div *ngIf="fromBlockDate">{{fromBlockDate | relativeDate}}</div>
       </div>
@@ -34,7 +12,7 @@
         - 
       </div>
       <div class="col-sm-5">
-        <input class='BlockNumberInput' [(ngModel)]=toBlock 
+        <input class='BlockNumberInput' [type]='number' [(ngModel)]=toBlock 
            placeholder="To" style='width:100%' (ngModelChange)='setDate("to")'>
         <div *ngIf="toBlockDate">{{toBlockDate | relativeDate}}</div>
        </div>

@@ -7,13 +7,17 @@ export class TxTreaterService {
   public status: string = '';
   public coin_supply: number = 1;
 
+  public tokenLoaded: boolean = false;
+  public tokenDecimals: number;
+  public tokenSymbol: string;
+
   // set by readTxList:
   public number_of_nodes: number = 0;
   public nodeIdList: Array<number> = []; // positions corresponds to id of node
   public nodeAddressList: Array<string> = []; // positions corresponds to id, value is address
   public nodeAdjacencyList: Array<any> = []; // contains list for each to which other nodes it points and by which transaction
   public nodeBalanceList: Array<number> = []; // contains list for each to which other nodes it points and by which transaction
-
+  public nodeTokenBalanceList: Array<number> = []; // if is erc20 token loaded, contains Token Balances
   // set from a selected list of nodes
   public nodes: Array<any> = []; // contains all data to plot nodes
   public edges: Array<any> = []; // contains all data to plot edges
@@ -30,9 +34,11 @@ export class TxTreaterService {
     this.nodeAddressList = new Array<string>();
     this.nodeAdjacencyList = new Array();
     this.nodeBalanceList = new Array<number>();
+    this.nodeTokenBalanceList = new Array<number>();
   }
 
-  readTxList(txList: Array<any>): Promise<any> {
+  readTxList(txList: Array<any>, erc20contract?: any): Promise<any> {
+    if (erc20contract !== undefined) this.tokenLoaded = true;
 
     this.status = 'Reading TX List';
     let is_id_in_List: (node_address: string) => number = 
@@ -86,6 +92,20 @@ export class TxTreaterService {
         })
       )
     }
+    if (this.tokenLoaded) {
+      for(let i=0; i<this.nodeAddressList.length; i++) {
+        promisesBalance.push(
+          this.web3service.getERC20balance(erc20contract, this.nodeAddressList[i])
+          .then((balance) => {
+            let tokenValue = this.web3service.toDecimal(balance);
+            this.nodeTokenBalanceList[i] = tokenValue;
+          })
+          .catch(error => {
+            console.log(error, 'Error with node ', this.nodeAddressList[i])
+          })
+        )
+      }
+    }
     return Promise.all(promisesBalance).then(() => this.status = '');
   }
 
@@ -110,13 +130,23 @@ export class TxTreaterService {
     this.nodes = [];
     for(let i=0; i<nodeIdList.length; i++){
       let node_id: number = nodeIdList[i];
+      let title: string =
+        'Wallet: '+ this.nodeAddressList[node_id] + '<br>'+
+        'Ether Balance: ' + this.nodeBalanceList[node_id]/1e18 + '  Ξ';
+      let size: number;
+      if (this.tokenLoaded){
+        title = title + '<br>' +
+          'Token Balance: ' + this.nodeTokenBalanceList[node_id]/this.tokenDecimals + '  ' + this.tokenSymbol;
+        size = this.getNodeSize(this.nodeTokenBalanceList[node_id]);
+      } else {
+        size = this.getNodeSize(this.nodeBalanceList[node_id]);
+      }
       this.nodes.push({
         id: nodeIdList[i],
         label: this.nodeAddressList[node_id].slice(0, 8),
-        size: this.getNodeSize(this.nodeBalanceList[node_id]),
+        size: size,
         url: 'https://etherscan.io/address/'+this.nodeAddressList[node_id],
-        title: 'Wallet: '+ this.nodeAddressList[node_id] + '<br>'+
-               'Ether Balance: ' + this.nodeBalanceList[node_id]/1e18 + '  Ξ'
+        title: title
       })      
     }
 
@@ -131,12 +161,14 @@ export class TxTreaterService {
       if (adjacency_list === undefined) continue;
       for(let j=0; j<adjacency_list.length;j++) {
         let edge = adjacency_list[j];
+        let title: string = 'TX: '+ edge.hash + '<br> Value: ';
+        if (this.tokenLoaded) title = title + edge.value/this.tokenDecimals + ' ' + this.tokenSymbol
+        else title = title + edge.value/1e18 + ' Ξ'
         this.edges.push({
           from: edge.from, 
           to: edge.to,
           label: edge.hash.slice(0,8),
-          title: 'TX: '+ edge.hash + '<br>'+
-                 'Value: ' + edge.value/1e18 + ' Ξ',
+          title: title,
           width: this.getEdgeSize(edge.value),
           url:  'https://etherscan.io/tx/'+edge.hash
         });

@@ -1,5 +1,4 @@
 import { Component, OnInit, ElementRef, NgZone } from '@angular/core';
-import { Web3ConnectService } from '../shared/web3-connect.service';
 import { TxTreaterService } from '../shared/tx-treater.service';
 import * as vis from 'vis';
 
@@ -12,23 +11,9 @@ export class Mindmap {
   public in_loading_status = false;
 
   constructor(private zone: NgZone,
-              private web3service: Web3ConnectService,
               private txtreaterService: TxTreaterService) {
     this.container = document.getElementById('Mindmap');
   }
-
-  initMindmapFromTxList(txList: Array<any>): Promise<any> {
-    this.in_loading_status = true;
-    this.status = 'Reading TX List';
-    this.txtreaterService.reset_lists();
-    
-    return this.txtreaterService.readTxList(txList)
-    .then(() => {
-      this.txtreaterService.setNodeList();
-      this.txtreaterService.setEdgeList();
-    })
-  }
-
 
   drawMindMap(nodeList?: Array<any>, edgeList?: Array<any>): void {
     if (nodeList === undefined) nodeList = this.txtreaterService.nodes;

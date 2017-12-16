@@ -1,3 +1,33 @@
-<p>
-  ether-observer works!
-</p>
+<div class='header'>
+  <h2>Ether Observer</h2>
+</div>
+
+
+<div id="container_mindmap">
+  <div id="Mindmap"></div>
+  <div id="loading" *ngIf="mindmap.in_loading_status">
+    <div id='loading_info_text'>{{mindmap.status}}</div>
+    <div class="loader"></div> 
+  </div>
+</div>
+
+<div class='footer'>
+  <div class='row' style='width:100%;'>
+    <div class="col-sm-1">
+      <div class="input-group-btn">
+        <button type="button" class="btn btn-secondary"
+                (click)="toggleFilters()">Filter</button>
+      </div>
+    </div>
+    <div class="col-sm-10">
+    </div>
+    <div class="col-sm-1">
+      <div class="input-group-btn">
+        <button type="button" class="btn btn-secondary"
+                (click)="toggleOptions()">Get Data</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-ether-observer-options></app-ether-observer-options>

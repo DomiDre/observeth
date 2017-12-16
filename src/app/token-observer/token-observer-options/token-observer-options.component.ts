@@ -18,6 +18,10 @@ export class TokenObserverOptionsComponent implements OnInit {
   public fromBlockDate: any;
   public toBlockDate: any;
 
+  public input_token_disabled: boolean = true;
+
+  public TokenErrorMessage: string;
+
   constructor(private zone: NgZone,
               private optionsService: OptionsService,
               private web3Service: Web3ConnectService) { }
@@ -46,17 +50,42 @@ export class TokenObserverOptionsComponent implements OnInit {
     return ERC20_tokens;
   }
 
-  setTokenContractAdress(token?: any): void {
+  setCustomTokenAddress(): void {
+    this.input_token_disabled = false;
+    this.tokenContractAddress = '';
+    this.selectedToken = undefined;
+    this.TokenErrorMessage = undefined;
+  }
+
+  setTokenContractAddress(token?: any): void {
     if (token !== undefined) {
+      this.input_token_disabled = true;
       this.selectedToken = token;
       this.tokenContractAddress = token.address;
+      this.TokenErrorMessage = undefined;
     }
   }
 
   getData(): void {
-    this.display=false;
-    this.optionsService.requestingData(this.tokenContractAddress,
-                                       this.fromBlock, this.toBlock)
+    let doUpdate: ()=>void = ()=> {
+      this.display=false;
+      this.optionsService.requestingData(this.tokenContractAddress,
+                                         this.fromBlock, this.toBlock)
+    }
+
+    let valid_address = true;
+    if (this.selectedToken === undefined) {
+      this.checkERC20address()
+      .then(valid_address => {
+        if(valid_address) {
+          doUpdate();
+        } else {
+          this.TokenErrorMessage = 'Entered token address not valid ERC20 token.'
+        }
+      })
+    } else {
+      doUpdate();
+    }
   }
 
   setDate(block: string): void{
@@ -69,6 +98,19 @@ export class TokenObserverOptionsComponent implements OnInit {
       .then((block) => this.zone.run(() => this.toBlockDate = block.timestamp * 1000))
       .catch((error) => {})
     }
+  }
+
+  checkERC20address(): Promise<boolean> {
+    if (this.tokenContractAddress.length !== 42) 
+      return new Promise(resolve => resolve(false));
+
+    let erc20contract = this.web3Service.getERC20Contract(this.tokenContractAddress);
+    
+    return new Promise((resolve) => {
+      this.web3Service.getERC20details(erc20contract)
+      .then((result) => {resolve(true)})
+      .catch((error) => {resolve(false)})
+    })
   }
 
 }

@@ -16,13 +16,18 @@ import { DonateComponent } from './donate/donate.component';
 import { AboutComponent } from './about/about.component';
 import { TestpageComponent } from './testpage/testpage.component';
 import { NoMetamaskComponent } from './no-metamask/no-metamask.component';
-import { LiveEthereumObserverComponent } from './live-ethereum-observer/live-ethereum-observer.component';
-import { EtherObserverComponent } from './ether-observer/ether-observer.component';
-import { LiveEthereumOptionsComponent } from './live-ethereum-observer/live-ethereum-options/live-ethereum-options.component';
+
 
 import { Web3ConnectService } from './shared/web3-connect.service';
 import { TxTreaterService } from './shared/tx-treater.service';
 import { RelativeDatePipe } from './shared/relative_time.pipe'
+
+import { LiveEthereumObserverComponent } from './live-ethereum-observer/live-ethereum-observer.component';
+import { LiveEthereumOptionsComponent } from './live-ethereum-observer/live-ethereum-options/live-ethereum-options.component';
+
+import { EtherObserverComponent } from './ether-observer/ether-observer.component';
+import { EtherObserverOptionsComponent } from './ether-observer/ether-observer-options/ether-observer-options.component'
+
 import { TokenObserverOptionsComponent } from './token-observer/token-observer-options/token-observer-options.component'
 
 
@@ -30,15 +35,19 @@ import { TokenObserverOptionsComponent } from './token-observer/token-observer-o
   declarations: [
     AppComponent,
     InfoHeaderComponent,
-    TokenObserverComponent,
     MainComponent,
     DonateComponent,
     AboutComponent,
     TestpageComponent,
     NoMetamaskComponent,
-    LiveEthereumObserverComponent,
+
     EtherObserverComponent,
+    EtherObserverOptionsComponent,
+    
+    LiveEthereumObserverComponent,
     LiveEthereumOptionsComponent,
+    
+    TokenObserverComponent,
     TokenObserverOptionsComponent,
     RelativeDatePipe
   ],
