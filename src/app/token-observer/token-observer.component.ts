@@ -40,12 +40,12 @@ export class TokenObserverComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription = this.optionService.connectObservable()
-                        .subscribe((data) => {
-                          this.tokenContractAddress = data.contractAddress;
-                          this.firstBlockNumber = data.from;
-                          this.latestBlockNumber = data.to;
-                          this.updateData();
-                        });
+    .subscribe((data) => {
+      this.tokenContractAddress = data.contractAddress;
+      this.firstBlockNumber = data.from;
+      this.latestBlockNumber = data.to;
+      this.updateData();
+    });
     this.mindmap = new Mindmap(this.zone, this.txtreaterService);
   }
 

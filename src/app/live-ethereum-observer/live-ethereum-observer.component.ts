@@ -1,9 +1,10 @@
-import { Component, OnInit, NgZone,  ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone,  ElementRef } from '@angular/core';
 import { TimerObservable } from 'rxjs/observable/TimerObservable';
 import { Web3ConnectService } from '../shared/web3-connect.service';
 import { Router } from '@angular/router';
 import { FiltersService } from './filters.service';
 import { TxTreaterService } from '../shared/tx-treater.service';
+import { Subscription } from 'rxjs/Subscription';
 
 import { Mindmap } from '../shared/mindmap';
 
@@ -15,7 +16,7 @@ import { LiveEthereumOptionsComponent } from './live-ethereum-options/live-ether
   styleUrls: ['./live-ethereum-observer.component.css'],
   providers: [ FiltersService ]
 })
-export class LiveEthereumObserverComponent implements OnInit {
+export class LiveEthereumObserverComponent implements OnInit, OnDestroy {
 
   public filtered_nodeId: Array<any>;
   public filtered_nodeAddress: Array<any>;
@@ -29,6 +30,8 @@ export class LiveEthereumObserverComponent implements OnInit {
   public timer: any;
   public displayOptions: boolean = false;
 
+  private subscription: Subscription;
+
   constructor(private zone: NgZone,
               private web3service: Web3ConnectService,
               private router: Router,
@@ -37,12 +40,21 @@ export class LiveEthereumObserverComponent implements OnInit {
               private txtreaterService: TxTreaterService) { }
 
   ngOnInit() {
+    this.subscription = this.filtersService.connectObservable()
+    .subscribe((data) => {
+      //
+    });
+
     this.mindmap = new Mindmap(this.zone, this.txtreaterService);
     this.txtreaterService.coin_supply = 96178066; // don't hardcode this
     this.isLiveUpdating = true;
 
     if (!this.web3service.isConnected()) this.router.navigateByUrl('/NoMetamask');
     else this.initializeDataCollection()
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   initializeDataCollection(): void {
@@ -87,8 +99,7 @@ export class LiveEthereumObserverComponent implements OnInit {
   }
 
   toggleOptions(): void {
-    this.displayOptions = !this.displayOptions;
-    if(!this.displayOptions) this.updateDisplayData();
+    this.filtersService.openFilters();
   }
 
 }

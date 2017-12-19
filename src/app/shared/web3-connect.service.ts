@@ -64,6 +64,15 @@ export class Web3ConnectService {
     return this.web3.toDecimal(data); // web3 0.20.2 method
   }
 
+  getConnectedAccount(): Promise<string> {
+    return new Promise ((resolve, reject) => {
+      this.web3.eth.getAccounts((error, result) => {
+        if (error) reject(error)
+        else resolve(result[0]);
+      });
+    });                 
+  }
+
   getBalance(address: string): Promise<number> {
     return new Promise( (resolve, reject) => 
       this.web3.eth.getBalance(address, 
@@ -96,6 +105,10 @@ export class Web3ConnectService {
     })
   }
 
+  getContract(contractAddress, abi): any {
+    return this.web3.eth.contract(abi).at(contractAddress)
+  }
+
   getERC20Contract(contractAddress): any {
     return this.web3.eth.contract(ERC20_abi).at(contractAddress)
   }
@@ -103,6 +116,15 @@ export class Web3ConnectService {
   getERC20balance(erc20contract, nodeAdress): Promise<any> {
     return new Promise( (resolve, reject) => {
       erc20contract.balanceOf(nodeAdress, (error, result) => {
+          if(error) reject(error)
+          else resolve(result)
+      })
+    })
+  }
+
+  public callFunctionReturningPromise(contract_function): Promise<any> {
+    return new Promise( (resolve, reject) => {
+      contract_function((error, result) => {
           if(error) reject(error)
           else resolve(result)
       })

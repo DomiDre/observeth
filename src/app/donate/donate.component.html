@@ -1,8 +1,42 @@
 <div class='header'>
   <h2>Donate</h2>
-  <p>If you like this page, feel free to show your gratitude and we will honor this by continuously improving the tools and quality of the provided data.</p>
-  <p>If you like you can also attach a message to your donation, which will be eternalized in the block chain and displayed here as a kind of guest book.</p>
 </div>
 <div class='footer'>
-  <p> nice </p>
+  <div>
+      <p>In the case that you like this page, feel free to show your gratitude and we will honor this by continuously improving the tools and quality of the provided data.</p>
+      <p>If you like you can also attach a message to your donation, which will be eternalized in the block chain and displayed here as a kind of guest book. You can for example provide us with ideas of additional features, which we should implement and we will try to make it possible.</p>
+  </div>
+  <div>
+    <div class="ui-g ui-fluid">
+
+      <div class="ui-g-12 ui-md-4"></div>
+      <div class="ui-g-12 ui-md-4">
+        <div class="ui-inputgroup">
+          <span class="ui-inputgroup-addon" style="width: 30%;">Alias</span>
+          <input type="text" pInputText placeholder="Anonymous" [(ngModel)]="entry_alias">
+        </div>
+        <div class="ui-inputgroup">
+          <span class="ui-inputgroup-addon" style="width: 30%;">Donation / Ξ</span>
+          <input type="number" step="0.0001" pInputText placeholder="0.01"  [(ngModel)]="entry_donation">      
+        </div>
+        <textarea [rows]="5" [cols]="30" pInputTextarea autoResize="autoResize" placeholder="Your message"  [(ngModel)]="entry_message"></textarea>
+        <button pButton type="button" label="Donate" (click)="pressDonate()"></button>
+        <span style="text-color:'red'">{{error_message}}</span>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    Alternatively you can also donate Ether / ERC20 tokens directly to observeth.eth ( 0x206f17AeEa6140aE96A17F244De98201e3bE4E03 ).
+  </div>
+  <br><br>
+  <div *ngIf="num_entries">
+    <h3>Messages</h3>
+      <div *ngFor="let gb_entry of guestbook_entries">
+        <p> From: {{gb_entry[1]}} @ {{gb_entry[2]}} </p>
+        <p> Donation: {{gb_entry[3]/1e18}} Ξ</p>
+        <p> Message: {{gb_entry[4]}}</p>
+        <p> --- </p>
+      </div>
+  </div>
 </div>

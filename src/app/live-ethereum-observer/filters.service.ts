@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { TxTreaterService } from '../shared/tx-treater.service';
+import { Observable } from 'rxjs';
+import { Subject } from 'rxjs/Subject';
 
 const Filters = {
   '': {
@@ -47,6 +49,9 @@ export class FiltersService {
   public filterValue:number; 
   public activeFilterList: Array<string>; // string list of all active filters 
   public availableFilters: Array<string>=[];
+
+  public showFilters:boolean = false;
+  public subject = new Subject<any>();
 
   constructor(private txtreaterService: TxTreaterService) {
     for(let filter in this.filters) {
@@ -126,5 +131,13 @@ export class FiltersService {
       }
     }
     return [filtered_nodeIds, filtered_adjacencyList]
+  }
+
+  openFilters(): void {
+    this.showFilters = true;
+  }
+
+  connectObservable(): Observable<any> {
+    return this.subject.asObservable();
   }
 }

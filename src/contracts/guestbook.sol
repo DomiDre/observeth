@@ -15,7 +15,7 @@ contract Guestbook {
     
     uint public running_id = 0; // number of guestbook entries
     mapping(uint=>Entry) public entries; // guestbook entries
-    uint minimum_donation = 10**15; // to prevent spam in the guestbook
+    uint public minimum_donation = 0; // to prevent spam in the guestbook
 
     function Guestbook() public { // called at creation of contract
         owner = msg.sender;
@@ -37,13 +37,17 @@ contract Guestbook {
         owner = _new_owner;
     }
 
+    function changeMinimumDonation(uint _minDonation) public onlyOwner {
+        minimum_donation = _minDonation;
+    }
+
     function destroy() onlyOwner public {
         selfdestruct(owner);
     }
 
     function createEntry(string _alias, string _message) payable public {
-        require(msg.value > 0); // entries only for those that donate something
-        entries[running_id] = Entry(msg.sender, _alias, block.number, msg.value, _message);
+        require(msg.value > minimum_donation); // entries only for those that donate something
+        entries[running_id] = Entry(msg.sender, _alias, block.timestamp, msg.value, _message);
         running_id++;
         donationWallet.transfer(msg.value);
     }

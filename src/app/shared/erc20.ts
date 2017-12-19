@@ -30,6 +30,12 @@ export var ERC20_tokens: any = [
     "logo": "kyber.png"
   },
   {
+    "name": 'Leverj',
+    "symbol": "LEV",
+    "address": '0x0f4ca92660efad97a9a70cb0fe969c755439772c',
+    "logo": "leverj.png"
+  },
+  {
     "name": 'OmiseGo',
     "symbol": "OMG",
     "address": '0xd26114cd6EE289AccF82350c8d8487fedB8A0C07',

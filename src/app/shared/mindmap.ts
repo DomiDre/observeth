@@ -72,7 +72,7 @@ export class Mindmap {
         improvedLayout: false
       },
       interaction: {
-        dragNodes: true,
+        dragNodes: false,
         tooltipDelay: 200,
         hover: true
       }

@@ -68,11 +68,13 @@ export class EtherObserverComponent implements OnInit, OnDestroy {
         .then((block_i) => {
             if (block_i !== null)
               transactionList = transactionList.concat(block_i.transactions);
+            else {
+              console.log('Error occured at block ', block_number);
+            }
             resolve();
         })
         .catch((error) => {})
       }).then( () => {
-        console.log(typeof(block_number), block_number)
         if (block_number<this.latestBlockNumber) {
           promiseLoop(block_number+1);
         } else {

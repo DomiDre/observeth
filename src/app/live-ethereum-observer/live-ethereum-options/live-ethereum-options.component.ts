@@ -1,16 +1,13 @@
-import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { FiltersService } from '../filters.service';
-import { Subscription } from 'rxjs/Subscription';
 
 @Component({
   selector: 'app-live-ethereum-options',
   templateUrl: './live-ethereum-options.component.html',
   styleUrls: ['./live-ethereum-options.component.css']
 })
-export class LiveEthereumOptionsComponent implements OnInit, OnDestroy {
-  @Input() display: boolean = false;
-  @Output() sidebar_hidden = new EventEmitter<any>();
-  
+export class LiveEthereumOptionsComponent implements OnInit {
+
   public currentFilterSelection:string='';
   public filterPlaceholder:string='';
   public selectedFilterString: string;
@@ -19,12 +16,11 @@ export class LiveEthereumOptionsComponent implements OnInit, OnDestroy {
   ngOnInit() {
   }
 
-  ngOnDestroy() {
-
+  get display(): boolean {
+    return this.filtersService.showFilters;
   }
-
-  hidingSidebar(): void {
-    this.sidebar_hidden.emit();
+  set display(_display: boolean) {
+    this.filtersService.showFilters = _display;
   }
 
   selectedFilter(filter: string) {
