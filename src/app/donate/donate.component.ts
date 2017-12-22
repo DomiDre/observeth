@@ -1,13 +1,23 @@
 import { Component, OnInit } from '@angular/core';
 import { Web3ConnectService } from '../shared/web3-connect.service';
+import { TimerObservable } from 'rxjs/observable/TimerObservable';
+
+interface GuestbookEntry {
+    alias: string;
+    donation: number;
+    message: string;
+    time: any;
+}
+
 @Component({
   selector: 'app-donate',
   templateUrl: './donate.component.html',
   styleUrls: ['./donate.component.css']
 })
 export class DonateComponent implements OnInit {
+  
 
-  public guestbook_address: string = '0x6fde15f71DFc656b42B83A4818Fec247a752aFf7'; // ropsten address
+  public guestbook_address: string = '0xe9dE671e80d7cfE661D2A1D18b08ef55D86681c2'; // ropsten address
   public guestbook_abi: any = [{"constant":true,"inputs":[],"name":"minimum_donation","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_new_storage","type":"address"}],"name":"changeDonationWallet","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"running_id","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"destroy","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_new_owner","type":"address"}],"name":"changeOwner","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"entries","outputs":[{"name":"owner","type":"address"},{"name":"alias","type":"string"},{"name":"blocknumber","type":"uint256"},{"name":"donation","type":"uint256"},{"name":"message","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_minDonation","type":"uint256"}],"name":"changeMinimumDonation","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"entry_id","type":"uint256"}],"name":"getEntry","outputs":[{"name":"","type":"address"},{"name":"","type":"string"},{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_alias","type":"string"},{"name":"_message","type":"string"}],"name":"createEntry","outputs":[],"payable":true,"stateMutability":"payable","type":"function"},{"constant":true,"inputs":[],"name":"donationWallet","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"payable":true,"stateMutability":"payable","type":"fallback"}];
   public guestbook_contract: any;
   public entry_alias: string = 'Anonymous';
@@ -15,16 +25,18 @@ export class DonateComponent implements OnInit {
   public entry_message: string;
   public error_message: string;
 
+  public timer: any;
+
   public num_entries: number;
-  public guestbook_entries: any = [];
+  public guestbook_entries: GuestbookEntry[];
   constructor(private web3connect: Web3ConnectService) { }
 
   ngOnInit() {
     this.guestbook_contract = 
       this.web3connect.getContract(this.guestbook_address, this.guestbook_abi);
 
-    this.getMessages() 
-
+    this.timer = TimerObservable.create(0, 10000)
+    .subscribe( () => this.getMessages())
   }
 
   getMessages() {
@@ -32,15 +44,29 @@ export class DonateComponent implements OnInit {
     .then((result) => {
       this.num_entries = this.web3connect.toDecimal(result);
       let promisesGetEntries = []
+      let guestbook_entries = []
       for(let i=0; i<this.num_entries; i++) {
         promisesGetEntries.push(new Promise( (resolve, reject) => {
           this.guestbook_contract.getEntry(i, (error, result) => {
             if(error) reject(error)
             else resolve(result)
             })
-          }).then((result) => this.guestbook_entries[i] = result)
+          }).then((result) => {
+            let entry: GuestbookEntry = {
+              alias: result[1],
+              time: result[2]*1000,
+              donation: result[3]/1e18,
+              message: result[4]
+            };
+            guestbook_entries[i] = entry;
+          })
         )
       }
+
+      Promise.all(promisesGetEntries)
+      .then((result) => {
+        this.guestbook_entries = guestbook_entries.reverse();
+      })
     });
 
   }
@@ -52,14 +78,18 @@ export class DonateComponent implements OnInit {
       let entry_message = this.entry_message || '';
       this.web3connect.getConnectedAccount().then((account) => {
         new Promise( (resolve, reject) => {
-          this.guestbook_contract.createEntry(this.entry_alias, entry_message,
-          {from: account, value:this.entry_donation*1e18, gas:300000},
+          this.guestbook_contract.createEntry.estimateGas(this.entry_alias, entry_message,
+          {from: account, value:this.entry_donation*1e18},
           (error, result) => {
             if(error) reject(error)
             else resolve(result)
           })
+        }).then((gasEstimate) => {
+          this.guestbook_contract.createEntry(this.entry_alias, entry_message,
+          {from: account, value:this.entry_donation*1e18, gas:gasEstimate},
+          (error, result) => {})
         })
-      });
+      })
     }
   }
 }

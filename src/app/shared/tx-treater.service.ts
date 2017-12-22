@@ -37,6 +37,12 @@ export class TxTreaterService {
     this.nodeTokenBalanceList = new Array<number>();
   }
 
+  disableTokenSetup(): void {
+    this.tokenLoaded = false;
+    this.tokenDecimals = undefined;
+    this.tokenSymbol = undefined;
+  }
+
   readTxList(txList: Array<any>, erc20contract?: any): Promise<any> {
     if (erc20contract !== undefined) this.tokenLoaded = true;
 

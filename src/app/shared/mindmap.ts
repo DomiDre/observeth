@@ -7,6 +7,7 @@ export class Mindmap {
   public container: any;
   public network: any;
 
+  public options: any;
   public status: string = '';
   public in_loading_status = false;
 
@@ -28,7 +29,7 @@ export class Mindmap {
       edges: edges
     };
     // Configuration for the Timeline
-    let options = {
+    this.options = {
       nodes: {
         shape: 'diamond',
         scaling: {
@@ -67,12 +68,16 @@ export class Mindmap {
         arrows: 'to',
         arrowStrikethrough: false
       },
-      physics: true,
+      physics: {
+        "barnesHut": {
+          "avoidOverlap": 1
+        }
+      },
       layout: {
         improvedLayout: false
       },
       interaction: {
-        dragNodes: false,
+        dragNodes: true,
         tooltipDelay: 200,
         hover: true
       }
@@ -80,7 +85,7 @@ export class Mindmap {
 
     // console.log(container)
     // Create a Timeline
-    this.network = new vis.Network(this.container, data, options);
+    this.network = new vis.Network(this.container, data, this.options);
     this.network.on("click", params => {
       if (params.nodes.length === 0 && params.edges.length > 0) {
         let edge = edges.get(params.edges[0]);
@@ -94,6 +99,8 @@ export class Mindmap {
 
     this.network.once("stabilizationIterationsDone", 
       () => {
+        this.options["physics"] = false;
+        this.network.setOptions(this.options);
         this.zone.run(() => {
           this.status = '';
           this.in_loading_status = false;

@@ -31,12 +31,15 @@
   </div>
   <br><br>
   <div *ngIf="num_entries">
-    <h3>Messages</h3>
-      <div *ngFor="let gb_entry of guestbook_entries">
-        <p> From: {{gb_entry[1]}} @ {{gb_entry[2]}} </p>
-        <p> Donation: {{gb_entry[3]/1e18}} Ξ</p>
-        <p> Message: {{gb_entry[4]}}</p>
-        <p> --- </p>
-      </div>
+    <h3>Donation Message Board</h3>
+      <p-dataList [value]='guestbook_entries' [paginator]="true" [rows]="5">
+
+        <ng-template let-GuestbookEntry pTemplate="item">
+          <p-panel header="{{GuestbookEntry.alias}} donated {{GuestbookEntry.donation}} Ξ @ {{GuestbookEntry.time | date:'medium'}}">
+          <p> {{GuestbookEntry.message}}</p>
+          </p-panel> <br>
+        </ng-template>
+      </p-dataList>
+
   </div>
 </div>
