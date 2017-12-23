@@ -20,7 +20,6 @@ import { FiltersService } from '../shared/filters/filters.service';
 export class LiveEthereumObserverComponent implements OnInit, OnDestroy {
 
   public filtered_nodeId: Array<any>;
-  public filtered_nodeAddress: Array<any>;
   public filtered_adjacencyList: Array<any>;
 
   public currentBlock: any; // the current Block containing all information
@@ -31,7 +30,7 @@ export class LiveEthereumObserverComponent implements OnInit, OnDestroy {
   public timer: any;
   public displayOptions: boolean = false;
 
-  private subscription: Subscription;
+  private subscription_filter: Subscription;
 
   constructor(private zone: NgZone,
               private web3service: Web3ConnectService,
@@ -41,13 +40,14 @@ export class LiveEthereumObserverComponent implements OnInit, OnDestroy {
               private txtreaterService: TxTreaterService) { }
 
   ngOnInit() {
-    this.subscription = this.filtersService.connectObservable()
-    .subscribe((data) => {
+    this.subscription_filter = this.filtersService.connectObservable()
+    .subscribe(() => {
       //
     });
     this.txtreaterService.disableTokenSetup();
+    this.filtersService.setTokenMode(false);
     this.mindmap = new Mindmap(this.zone, this.txtreaterService);
-    this.txtreaterService.coin_supply = 96178066; // don't hardcode this
+    this.txtreaterService.coin_supply = 96519270; // don't hardcode this
     this.isLiveUpdating = true;
 
     if (!this.web3service.isConnected()) this.router.navigateByUrl('/NoMetamask');
@@ -55,7 +55,7 @@ export class LiveEthereumObserverComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subscription.unsubscribe();
+    this.subscription_filter.unsubscribe();
   }
 
   initializeDataCollection(): void {

@@ -34,9 +34,9 @@ export class EtherObserverComponent implements OnInit, OnDestroy {
   private ERC20_contract: any;
 
   private subscription: Subscription;
+  private subscription_filter: Subscription;
 
   public filtered_nodeId: Array<any>;
-  public filtered_nodeAddress: Array<any>;
   public filtered_adjacencyList: Array<any>;
 
   constructor(private zone: NgZone,
@@ -53,13 +53,25 @@ export class EtherObserverComponent implements OnInit, OnDestroy {
                           this.latestBlockNumber = data.to;
                           this.updateData();
                         });
+
+    this.subscription_filter = this.filtersService.connectObservable()
+    .subscribe(() => {
+      if (this.transactionList !== undefined) {
+        this.updatePlot()
+      }
+    })
+
+    this.txtreaterService.disableTokenSetup();
+    this.filtersService.setTokenMode(false);
     this.mindmap = new Mindmap(this.zone, this.txtreaterService);
     this.txtreaterService.coin_supply =  96519270; // don't hardcode this
-    this.toggleOptions()
+    this.toggleOptions();
+    // this.toggleFilters();
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+    this.subscription_filter.unsubscribe();
   }
 
   updateData(): void {
@@ -71,35 +83,48 @@ export class EtherObserverComponent implements OnInit, OnDestroy {
       this.firstBlockNumber + ' and ' + this.latestBlockNumber;
     
     let transactionList = [];
-    let promiseLoop: (number) => void = (block_number) => {
+    let promiseBlockInfos = [];
+    let num_blocks = this.latestBlockNumber - this.firstBlockNumber + 1;
+
+
+    for(let i=0; i<num_blocks; i++) {
+      let block_number = this.firstBlockNumber+i
       let promise = new Promise((resolve, reject) => {
         this.web3service.getBlock(block_number)
         .then((block_i) => {
             if (block_i !== null)
-              transactionList = transactionList.concat(block_i.transactions);
+              transactionList[i] = block_i.transactions;
             else {
-              console.log('Error occured at block ', block_number);
+              console.log('Error occured at fetching block ', block_number);
             }
             resolve();
         })
         .catch((error) => {})
-      }).then( () => {
-        if (block_number<this.latestBlockNumber) {
-          promiseLoop(block_number+1);
-        } else {
-          this.txtreaterService.readTxList(transactionList)
-          .then(() => {
-            this.mindmap.status = 'Evaluating blocks.';
-            this.txtreaterService.setNodeList();
-            this.txtreaterService.setEdgeList();    
-            this.mindmap.drawMindMap();
-          })
-        }
-      })
+      });
+      promiseBlockInfos.push(promise)
     }
-    promiseLoop(this.firstBlockNumber);
+    
+    Promise.all(promiseBlockInfos)
+    .then(() => {
+      this.transactionList = []
+      for(let i=0; i<num_blocks; i++) {
+        this.transactionList = this.transactionList.concat(transactionList[i])
+      }
+      this.mindmap.status = 'Evaluating blocks.';
+      this.txtreaterService.readTxList(this.transactionList)
+      .then(() => this.updatePlot())
+    })
   }
   
+  updatePlot(): void {
+    this.mindmap.status = 'Applying filters.';
+    [this.filtered_nodeId, this.filtered_adjacencyList] =
+      this.filtersService.filtered_transactions()
+    this.txtreaterService.setNodeList(this.filtered_nodeId);
+    this.txtreaterService.setEdgeList(this.filtered_adjacencyList);
+
+    this.mindmap.drawMindMap();
+  }
 
   toggleOptions(): void {
     this.optionService.openOptions();

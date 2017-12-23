@@ -39,7 +39,7 @@ export class TxTreaterService {
 
   disableTokenSetup(): void {
     this.tokenLoaded = false;
-    this.tokenDecimals = undefined;
+    this.tokenDecimals = 10**18;
     this.tokenSymbol = undefined;
   }
 
@@ -64,6 +64,7 @@ export class TxTreaterService {
     }
     //reads a txList and sorts its entries to nodes, nodeAddressList and nodeAdjacencyList 
     for(let txData of txList) {
+      if (txData == undefined) continue;
       // read txData
       let tx_from: string = txData.from;
       let tx_to: string = txData.to;

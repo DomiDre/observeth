@@ -46,4 +46,8 @@ export class FiltersComponent implements OnInit {
       (active_filter.value !== active_filter.defaultValue)
     this.filtersService.validity_checks;
   }
+
+  close() {
+    this.filtersService.toggleHidingSidebar();
+  }
 }

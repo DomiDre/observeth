@@ -14,30 +14,80 @@ export class FiltersService {
 
   public showFilters:boolean = false;
   public subject = new Subject<any>();
+  public coinSymbol: string = 'Ξ';
 
+  public TokenMode: boolean = false;
   constructor(private txtreaterService: TxTreaterService) {
-    for(let filter in this.filters) {
-      if(filter !== '') this.availableFilters.push(filter);
+    this.setAvailableFilters();
+  }
+
+  setTokenMode(state:boolean): void {
+    if (state) {
+      this.TokenMode = true;
+      this.coinSymbol = '';
+    } else {
+      this.TokenMode = false;
+      this.coinSymbol = 'Ξ';
     }
+    this.setAvailableFilters();
+  }
+
+  setAvailableFilters(): void {
+    this.availableFilters = [];
+    for(let filter in this.filters) {
+      if(filter == '') continue
+      if(!this.TokenMode && this.filters[filter].tokenFilter) continue
+      this.availableFilters.push(filter);
+    }
+  }
+
+  toggleHidingSidebar(): void {
+    this.subject.next();
   }
 
   get validity_checks(): { (tx: any): boolean}[]{
     this.activeFilterList = [];
     let validity_checks = [];
     if (this.filters['MinTxVol'].set) {
-      this.activeFilterList.push('Transaction volume >= ' + this.filters['MinTxVol'].value + ' Ξ');
-      validity_checks.push((tx) => tx.value/1e18 >= this.filters['MinTxVol'].value);
+      this.activeFilterList.push('Transaction volume >= ' + this.filters['MinTxVol'].value + ' ' + this.coinSymbol);
+      validity_checks.push((tx) => tx.value/this.txtreaterService.tokenDecimals >= this.filters['MinTxVol'].value);
     }
     
-    if (this.filters['MinBalanceFrom'].set) {
-      this.activeFilterList.push('From node balance >= ' + this.filters['MinBalanceFrom'].value + ' Ξ');
-      validity_checks.push((tx) => this.txtreaterService.nodeBalanceList[tx.from]/1e18 >= this.filters['MinBalanceFrom'].value);
+    if (this.filters['MinEthBalanceFrom'].set) {
+      this.activeFilterList.push('Ether balance of transaction sender >= ' + this.filters['MinEthBalanceFrom'].value + ' Ξ');
+      validity_checks.push((tx) => this.txtreaterService.nodeBalanceList[tx.from]/1e18 >= this.filters['MinEthBalanceFrom'].value);
     }
 
-    if (this.filters['MinBalanceTo'].set) {
-      this.activeFilterList.push('To node balance >= ' + this.filters['MinBalanceTo'].value + ' Ξ');
-      validity_checks.push((tx) => this.txtreaterService.nodeBalanceList[tx.to]/1e18 >= this.filters['MinBalanceTo'].value);
+    if (this.filters['MinEthBalanceTo'].set) {
+      this.activeFilterList.push('Ether balance of transaction receiver >= ' + this.filters['MinEthBalanceTo'].value + ' Ξ');
+      validity_checks.push((tx) => this.txtreaterService.nodeBalanceList[tx.to]/1e18 >= this.filters['MinEthBalanceTo'].value);
     }
+
+    if (this.filters['MinEthBalance'].set) {
+      this.activeFilterList.push('Ether balance of nodes >= ' + this.filters['MinEthBalance'].value + ' Ξ');
+      validity_checks.push((tx) => this.txtreaterService.nodeBalanceList[tx.to]/1e18 >= this.filters['MinEthBalance'].value);
+      validity_checks.push((tx) => this.txtreaterService.nodeBalanceList[tx.from]/1e18 >= this.filters['MinEthBalance'].value);
+    }
+    
+    if(this.TokenMode) {
+      if (this.filters['MinTokBalanceFrom'].set) {
+        this.activeFilterList.push('From node token balance >= ' + this.filters['MinTokBalanceFrom'].value + ' ' + this.coinSymbol);
+        validity_checks.push((tx) => this.txtreaterService.nodeBalanceList[tx.from]/this.txtreaterService.tokenDecimals >= this.filters['MinTokBalanceFrom'].value);
+      }
+
+      if (this.filters['MinTokBalanceTo'].set) {
+        this.activeFilterList.push('To node token balance >= ' + this.filters['MinTokBalanceTo'].value + ' ' + this.coinSymbol);
+        validity_checks.push((tx) => this.txtreaterService.nodeBalanceList[tx.to]/this.txtreaterService.tokenDecimals >= this.filters['MinTokBalanceTo'].value);
+      }
+
+      if (this.filters['MinTokBalance'].set) {
+        this.activeFilterList.push('Node token balance >= ' + this.filters['MinTokBalance'].value + ' ' + this.coinSymbol);
+        validity_checks.push((tx) => this.txtreaterService.nodeTokenBalanceList[tx.to]/this.txtreaterService.tokenDecimals >= this.filters['MinTokBalance'].value);
+        validity_checks.push((tx) => this.txtreaterService.nodeTokenBalanceList[tx.from]/this.txtreaterService.tokenDecimals >= this.filters['MinTokBalance'].value);
+      }
+    }
+
+      
 
     // if (this.filters['MinGasPri'].set) {
     //   this.activeFilterList.push('Gas price >= ' + this.filters['MinGasPri'].value + ' GWei');

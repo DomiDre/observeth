@@ -30,7 +30,7 @@ export class TokenObserverOptionsComponent implements OnInit {
     this.web3Service.getBlockNumber()
     .then((blocknumber) => {
       this.toBlock = blocknumber;
-      this.fromBlock = blocknumber - 100;
+      this.fromBlock = blocknumber - 1000;
       this.zone.run( () => {
         this.setDate('from');
         this.setDate('to');

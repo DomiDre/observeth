@@ -22,8 +22,8 @@ export class EtherObserverOptionsComponent implements OnInit {
   ngOnInit() {
     this.web3Service.getBlockNumber()
     .then((blocknumber) => {
-      this.toBlock = blocknumber;
-      this.fromBlock = blocknumber - 4;
+      this.toBlock = blocknumber-1;
+      this.fromBlock = blocknumber - 5;
       this.zone.run( () => {
         this.setDate('from');
         this.setDate('to');

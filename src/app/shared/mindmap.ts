@@ -21,6 +21,9 @@ export class Mindmap {
     if (edgeList === undefined) edgeList = this.txtreaterService.edges;
 
     this.status = 'Drawing Mindmap';
+    if(nodeList.length == 0) {
+      this.status = 'Mindmap contains no nodes (range to small or filters to restrictive)';
+    }
     this.in_loading_status = true;
     let nodes = new vis.DataSet(nodeList)
     let edges = new vis.DataSet(edgeList);
@@ -69,8 +72,12 @@ export class Mindmap {
         arrowStrikethrough: false
       },
       physics: {
-        "barnesHut": {
-          "avoidOverlap": 1
+        stabilization: {
+            enabled: true,
+            iterations: 180, // maximum number of iteration to stabilize
+            updateInterval: 10,
+            onlyDynamicEdges: false,
+            fit: true
         }
       },
       layout: {
@@ -99,8 +106,8 @@ export class Mindmap {
 
     this.network.once("stabilizationIterationsDone", 
       () => {
-        this.options["physics"] = false;
-        this.network.setOptions(this.options);
+        // this.options["physics"] = false;
+        // this.network.setOptions(this.options);
         this.zone.run(() => {
           this.status = '';
           this.in_loading_status = false;

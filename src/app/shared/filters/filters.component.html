@@ -1,4 +1,4 @@
-<p-sidebar [(visible)]="display" styleClass='ui-sidebar-md'>
+<p-sidebar [(visible)]="display" styleClass='ui-sidebar-md' (onHide)="close()">
   <div *ngIf="filtersService && filterList">
     <h2 style="text-align:left;"> Filters </h2>
     <div class="ui-g-12">

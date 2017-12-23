@@ -29,7 +29,7 @@ export class DonateComponent implements OnInit {
 
   public num_entries: number;
   public guestbook_entries: GuestbookEntry[];
-  constructor(private web3connect: Web3ConnectService) { }
+  constructor(public web3connect: Web3ConnectService) { }
 
   ngOnInit() {
     this.guestbook_contract = 

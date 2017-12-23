@@ -8,11 +8,14 @@ import { OptionsService } from './options.service'
 import { Mindmap } from '../shared/mindmap';
 import { Subscription } from 'rxjs/Subscription';
 
+import { FiltersComponent } from '../shared/filters/filters.component';
+import { FiltersService } from '../shared/filters/filters.service';
+
 @Component({
   selector: 'app-token-observer',
   templateUrl: './token-observer.component.html',
   styleUrls: ['./token-observer.component.css'],
-  providers: [ OptionsService ]
+  providers: [ OptionsService, FiltersService ]
 })
 export class TokenObserverComponent implements OnInit, OnDestroy {
 
@@ -31,12 +34,18 @@ export class TokenObserverComponent implements OnInit, OnDestroy {
   private ERC20_contract: any;
 
   private subscription: Subscription;
+  private subscription_filter: Subscription;
+
+  public filtered_nodeId: Array<any>;
+  public filtered_adjacencyList: Array<any>;
+
 
   constructor(private zone: NgZone,
               private web3service: Web3ConnectService,
               private txtreaterService: TxTreaterService,
               private element: ElementRef,
-              private optionService: OptionsService) { }
+              private optionService: OptionsService,
+              private filtersService: FiltersService) { }
 
   ngOnInit() {
     this.subscription = this.optionService.connectObservable()
@@ -46,12 +55,21 @@ export class TokenObserverComponent implements OnInit, OnDestroy {
       this.latestBlockNumber = data.to;
       this.updateData();
     });
+
+    this.subscription_filter = this.filtersService.connectObservable()
+    .subscribe(() => {
+      if (this.transactionList !== undefined) {
+        this.updatePlot()
+      }
+    })
     this.mindmap = new Mindmap(this.zone, this.txtreaterService);
+    this.filtersService.setTokenMode(true);
     this.toggleOptions();
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+    this.subscription_filter.unsubscribe();
   }
 
   updateData(): void {
@@ -66,6 +84,7 @@ export class TokenObserverComponent implements OnInit, OnDestroy {
     .then((data) => {
       this.txtreaterService.tokenDecimals = 10**this.web3service.toDecimal(data[0]);
       this.txtreaterService.tokenSymbol = data[1];
+      this.filtersService.coinSymbol = data[1];
       this.txtreaterService.coin_supply = this.web3service.toDecimal(data[2]);
     }).then( () => {
       this.mindmap.status = 'Getting logs between block ' + 
@@ -78,22 +97,22 @@ export class TokenObserverComponent implements OnInit, OnDestroy {
       .get((error, logs) => {
         this.evaluateLogs0_20(logs, 
         () => {
-          this.mindmap.status = 'Reading TX List';
+          this.mindmap.status = 'Reading transactions';
           this.txtreaterService.readTxList(this.transactionList, this.ERC20_contract)
-          .then(() => {
-            this.txtreaterService.setNodeList();
-            this.txtreaterService.setEdgeList();
-          })
-          .then(() => 
-            this.zone.run(() => 
-            this.mindmap.drawMindMap()
-            )
-          )
+          .then(() => this.updatePlot())
         })
       })
     })
   }
 
+  updatePlot(): void {
+    this.mindmap.status = 'Applying filters.';
+    [this.filtered_nodeId, this.filtered_adjacencyList] =
+      this.filtersService.filtered_transactions()
+    this.txtreaterService.setNodeList(this.filtered_nodeId);
+    this.txtreaterService.setEdgeList(this.filtered_adjacencyList);
+    this.zone.run(() => this.mindmap.drawMindMap())
+  }
   
   evaluateLogs0_20(logs, callback): void {
     let TransferHex = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
@@ -131,7 +150,7 @@ export class TokenObserverComponent implements OnInit, OnDestroy {
   }
 
   toggleFilters(): void {
-    
+    this.filtersService.openFilters();
   }
 }
       
