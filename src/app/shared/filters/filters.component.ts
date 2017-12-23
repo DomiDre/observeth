@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, NgZone } from '@angular/core';
 import { FiltersService } from './filters.service';
 
 @Component({
@@ -11,9 +11,13 @@ export class FiltersComponent implements OnInit {
   public currentFilterSelection:string='';
   public filterPlaceholder:string='';
   public selectedFilterString: string;
-
+  public filterEntryBoxValue: number;
   public filterList: any = [];
-  constructor(public filtersService: FiltersService) { }
+
+  public activeFilterList: Array<string> = [];
+
+  constructor(private zone: NgZone,
+              private filtersService: FiltersService) { }
 
   ngOnInit() {
     this.filterList.push({label:'Select Filter', value:''})
@@ -34,20 +38,32 @@ export class FiltersComponent implements OnInit {
     this.filtersService.showFilters = _display;
   }
 
-  selectedFilter(filter: string) {
-    this.currentFilterSelection = filter;
-    this.filterPlaceholder = this.filtersService.filters[filter].title;
-    this.selectedFilterString = this.filterPlaceholder;
+  selectedFilter(): void {
+    this.currentFilterSelection = this.selectedFilterString;
+    this.filterPlaceholder = this.filtersService.filters[this.selectedFilterString].title;
+    this.filterEntryBoxValue = this.filtersService.filters[this.selectedFilterString].value;
   }
 
-  filterValueChanged(filter: string) {
-    let active_filter = this.filtersService.filters[filter]
-    active_filter.set = 
-      (active_filter.value !== active_filter.defaultValue)
-    this.filtersService.validity_checks;
+  updateFilters(): void {
+    this.zone.run(() => {
+      this.filtersService.validity_checks;
+      this.activeFilterList = this.filtersService.getActiveFilterList();
+    });
   }
 
-  close() {
+  filterValueChanged(filter: string): void {
+    this.zone.run(() => {
+      this.filtersService.filters[filter].value = this.filterEntryBoxValue;
+      this.filtersService.filters[filter].set = 
+        (this.filtersService.filters[filter].value !== this.filtersService.filters[filter].defaultValue)
+
+      this.filtersService.validity_checks;
+      this.activeFilterList = this.filtersService.getActiveFilterList();
+    });
+  }
+
+  close(): void {
     this.filtersService.toggleHidingSidebar();
   }
+
 }

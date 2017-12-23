@@ -45,6 +45,9 @@ export class FiltersService {
     this.subject.next();
   }
 
+  getActiveFilterList(): Array<string> {
+    return this.activeFilterList;
+  }
   get validity_checks(): { (tx: any): boolean}[]{
     this.activeFilterList = [];
     let validity_checks = [];

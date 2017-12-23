@@ -1,27 +1,32 @@
 <p-sidebar [(visible)]="display" styleClass='ui-sidebar-md' (onHide)="close()">
-  <div *ngIf="filtersService && filterList">
+  <div *ngIf="filterList.length>0">
     <h2 style="text-align:left;"> Filters </h2>
     <div class="ui-g-12">
       <div class="ui-inputgroup">
-        <p-dropdown [options]="filterList" [(ngModel)]="selectedFilterString" [autoWidth]="true"></p-dropdown>
+        <p-dropdown [options]="filterList" [(ngModel)]="selectedFilterString" [autoWidth]="true" (onChange)="selectedFilter()"></p-dropdown>
         <span *ngIf="selectedFilterString">
         <input type="number" class="form-control"
              ng-model="input-number"
              aria-label="Filter input"
              placeholder="{{filterPlaceholder}}"
-             [(ngModel)]="filtersService.filters[selectedFilterString].value"
+             [(ngModel)]="filterEntryBoxValue"
              (change)="filterValueChanged(selectedFilterString)"
              contenteditable="true">
-         </span>
+        </span>
+        <span *ngIf="selectedFilterString">
+          <button type="button" class="btn btn-secondary"
+            (click)="updateFilters()">Add</button>
+        </span>
+
       </div>
     </div>
     <div *ngIf="selectedFilterString">
       Selected filter: {{filterName}}
     </div>
     <br>
-    <div *ngIf="filtersService.activeFilterList && filtersService.activeFilterList.length > 0">
+    <div *ngIf="activeFilterList && activeFilterList.length > 0">
       <h4 style="text=align:left;"> Active Filters </h4>
-      <div *ngFor="let filter of filtersService.activeFilterList">
+      <div *ngFor="let filter of activeFilterList">
         {{filter}}
       </div>
     </div> 
