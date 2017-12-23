@@ -1,15 +1,24 @@
 <p-dialog header='Options' [(visible)]='display' [width]=420>
   <div><h2 style="text-align: left;">Select Token</h2></div>
-  <span *ngFor="let token of tokens">
-    <a (click)='setTokenContractAddress(token)'>
-      <img src='assets/erc20_logos/{{token.logo}}'>
-    </a>
-  </span>
-  <span>
+  <div>
+    <span *ngFor="let token of tokens | slice:0:12">
+      <a (click)='setTokenContractAddress(token)'>
+        <img src='assets/erc20_logos/{{token.logo}}'>
+      </a>
+    </span>
+  </div>
+  <div>
+    <span *ngFor="let token of tokens | slice:12:24">
+      <a (click)='setTokenContractAddress(token)'>
+        <img src='assets/erc20_logos/{{token.logo}}'>
+      </a>
+    </span>
+  </div>
+  <div>
     <a (click)='setCustomTokenAddress()'>
-      Custom
+      Enter Custom Address
     </a>
-  </span>
+  </div>
   <div>
   <input id='TokenAdress' [(ngModel)]=tokenContractAddress 
            placeholder="Token Contract Address" [disabled]=input_token_disabled>

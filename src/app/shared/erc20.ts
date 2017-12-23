@@ -54,10 +54,22 @@ export var ERC20_tokens: any = [
     "logo": "request.png"
   },
   {
+    "name": 'Ripio Credit Network',
+    "symbol": "RCN",
+    "address": '0xf970b8e36e23f7fc3fd752eea86f8be8d83375a6',
+    "logo": "ripio.png"
+  },
+  {
     "name": 'StatusNetwork',
     "symbol": "SNT",
     "address": '0x744d70fdbe2ba4cf95131626614a1763df805b9e',
     "logo": "status.png"
+  },
+  {
+    "name": 'Swarm City',
+    "symbol": "SWT",
+    "address": '0xb9e7f8568e08d5659f5d29c4997173d84cdf2607',
+    "logo": "swarmcity.png"
   },
   {
     "name": 'TenXPay',

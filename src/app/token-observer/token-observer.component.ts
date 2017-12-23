@@ -47,6 +47,7 @@ export class TokenObserverComponent implements OnInit, OnDestroy {
       this.updateData();
     });
     this.mindmap = new Mindmap(this.zone, this.txtreaterService);
+    this.toggleOptions();
   }
 
   ngOnDestroy() {

@@ -5,7 +5,7 @@ contract Guestbook {
         // structure for an guestbook entry
         address owner;
         string alias;
-        uint blocknumber;
+        uint timestamp;
         uint donation;
         string message;
     }
@@ -53,7 +53,7 @@ contract Guestbook {
     }
 
     function getEntry(uint entry_id) public constant returns (address, string, uint, uint, string) {
-        return (entries[entry_id].owner, entries[entry_id].alias, entries[entry_id].blocknumber,
+        return (entries[entry_id].owner, entries[entry_id].alias, entries[entry_id].timestamp,
                 entries[entry_id].donation, entries[entry_id].message);
     }
 }

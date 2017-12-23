@@ -8,11 +8,14 @@ import { OptionsService } from './etheroptions.service'
 import { Mindmap } from '../shared/mindmap';
 import { Subscription } from 'rxjs/Subscription';
 
+import { FiltersComponent } from '../shared/filters/filters.component';
+import { FiltersService } from '../shared/filters/filters.service';
+
 @Component({
   selector: 'app-ether-observer',
   templateUrl: './ether-observer.component.html',
   styleUrls: ['./ether-observer.component.css'],
-  providers: [ OptionsService ]
+  providers: [ OptionsService, FiltersService ]
 })
 export class EtherObserverComponent implements OnInit, OnDestroy {
 
@@ -32,11 +35,16 @@ export class EtherObserverComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription;
 
+  public filtered_nodeId: Array<any>;
+  public filtered_nodeAddress: Array<any>;
+  public filtered_adjacencyList: Array<any>;
+
   constructor(private zone: NgZone,
               private web3service: Web3ConnectService,
               private txtreaterService: TxTreaterService,
               private element: ElementRef,
-              private optionService: OptionsService) { }
+              private optionService: OptionsService,
+              private filtersService: FiltersService) { }
 
   ngOnInit() {
     this.subscription = this.optionService.connectObservable()
@@ -46,7 +54,8 @@ export class EtherObserverComponent implements OnInit, OnDestroy {
                           this.updateData();
                         });
     this.mindmap = new Mindmap(this.zone, this.txtreaterService);
-    this.txtreaterService.coin_supply =  96371155; // don't hardcode this
+    this.txtreaterService.coin_supply =  96519270; // don't hardcode this
+    this.toggleOptions()
   }
 
   ngOnDestroy() {
@@ -97,42 +106,6 @@ export class EtherObserverComponent implements OnInit, OnDestroy {
   }
 
   toggleFilters(): void {
-    
+    this.filtersService.openFilters();    
   }
 }
-
-
-      
-
-  // removeLeadingZeros(data): string {
-  //   let byteData = this.web3service.web3.utils.hexToBytes(data);
-  //   for (let i = 0; i < byteData.length; i++) {
-  //     if (byteData[0] == 0) {
-  //       byteData.splice(0, 1);
-  //     }
-  //   }
-  //   return this.web3service.web3.utils.bytesToHex(byteData);
-  // }
-
-  // evaluateLogs(logs): void {
-  //   let TransferHex = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
-  //   let ApproveHex = '0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925';
-
-  //   for(let txData of logs) {
-  //     let methodId = txData.topics['0'];
-  //     if (methodId === TransferHex) { // transfer: 1 transfers to 2 
-  //       let txEntry = new TXData();
-  //       txEntry.hash = txData.transactionHash;
-  //       // check 1e18 factor
-  //       txEntry.value = this.web3service.web3.utils.hexToNumberString(txData.data);
-  //       txEntry.from = this.removeLeadingZeros(txData.topics['1']);
-  //       txEntry.to = this.removeLeadingZeros(txData.topics['2']);
-  //       this.transactionList.push(txEntry);
-  //     } else if (methodId == ApproveHex) { // approve: you allowed somebody else to withdraw from your account
-  //       // not implemented yet
-  //     } else {
-  //       console.log(methodId,' not known, check ', txData.transactionHash,'. Please report this.');
-  //     }
-  //     this.processingBlockNumber = txData.blockNumber;          
-  //   }
-  // }

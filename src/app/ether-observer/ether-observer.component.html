@@ -12,22 +12,15 @@
 </div>
 
 <div class='footer'>
-  <div class='row' style='width:100%;'>
-    <div class="col-sm-1">
-      <div class="input-group-btn">
-        <button type="button" class="btn btn-secondary"
+  <div class='input-group'>
+    <button type="button" class="btn btn-secondary"
                 (click)="toggleFilters()">Filter</button>
-      </div>
-    </div>
-    <div class="col-sm-10">
-    </div>
-    <div class="col-sm-1">
-      <div class="input-group-btn">
-        <button type="button" class="btn btn-secondary"
-                (click)="toggleOptions()">Get Data</button>
-      </div>
-    </div>
+    <span class="input-group-btn" style="width:5px;"></span>
+    <button type="button" class="btn btn-secondary"
+            (click)="toggleOptions()">Set Range</button>
+
   </div>
 </div>
 
 <app-ether-observer-options></app-ether-observer-options>
+<app-filters></app-filters>

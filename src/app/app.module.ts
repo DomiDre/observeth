@@ -7,29 +7,28 @@ import { ParticlesModule } from 'angular-particle';
 
 import { AppComponent } from './app.component';
 import { PrimeNgModule } from './shared/primeng.module';
+import { AppRoutingModule } from './/app-routing.module';
 
 import { InfoHeaderComponent } from './info-header/info-header.component';
-import { TokenObserverComponent } from './token-observer/token-observer.component';
-import { AppRoutingModule } from './/app-routing.module';
 import { MainComponent } from './main/main.component';
 import { DonateComponent } from './donate/donate.component';
 import { AboutComponent } from './about/about.component';
 import { TestpageComponent } from './testpage/testpage.component';
 import { NoMetamaskComponent } from './no-metamask/no-metamask.component';
 
-
 import { Web3ConnectService } from './shared/web3-connect.service';
 import { TxTreaterService } from './shared/tx-treater.service';
-import { RelativeDatePipe } from './shared/relative_time.pipe'
 
 import { LiveEthereumObserverComponent } from './live-ethereum-observer/live-ethereum-observer.component';
-import { LiveEthereumOptionsComponent } from './live-ethereum-observer/live-ethereum-options/live-ethereum-options.component';
 
 import { EtherObserverComponent } from './ether-observer/ether-observer.component';
 import { EtherObserverOptionsComponent } from './ether-observer/ether-observer-options/ether-observer-options.component'
 
+import { TokenObserverComponent } from './token-observer/token-observer.component';
 import { TokenObserverOptionsComponent } from './token-observer/token-observer-options/token-observer-options.component'
 
+import { FiltersComponent } from './shared/filters/filters.component';
+import { RelativeDatePipe } from './shared/relative_time.pipe'
 
 @NgModule({
   declarations: [
@@ -45,10 +44,12 @@ import { TokenObserverOptionsComponent } from './token-observer/token-observer-o
     EtherObserverOptionsComponent,
     
     LiveEthereumObserverComponent,
-    LiveEthereumOptionsComponent,
     
     TokenObserverComponent,
     TokenObserverOptionsComponent,
+    
+    FiltersComponent,
+    
     RelativeDatePipe
   ],
   imports: [

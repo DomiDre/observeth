@@ -2,13 +2,14 @@ import { Component, OnInit, OnDestroy, NgZone,  ElementRef } from '@angular/core
 import { TimerObservable } from 'rxjs/observable/TimerObservable';
 import { Web3ConnectService } from '../shared/web3-connect.service';
 import { Router } from '@angular/router';
-import { FiltersService } from './filters.service';
 import { TxTreaterService } from '../shared/tx-treater.service';
 import { Subscription } from 'rxjs/Subscription';
 
 import { Mindmap } from '../shared/mindmap';
 
-import { LiveEthereumOptionsComponent } from './live-ethereum-options/live-ethereum-options.component';
+import { FiltersComponent } from '../shared/filters/filters.component';
+import { FiltersService } from '../shared/filters/filters.service';
+
 
 @Component({
   selector: 'app-live-ethereum-observer',

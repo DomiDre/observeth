@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
-import { CheckboxModule, ButtonModule, DataTableModule, DataListModule, InputTextModule, 
+import { CheckboxModule, ButtonModule, DataTableModule, DataListModule,
+        DropdownModule, InputTextModule, 
         InputTextareaModule, OverlayPanelModule, DialogModule, 
         SpinnerModule, SidebarModule, SliderModule, SplitButtonModule, TooltipModule, 
         PanelModule } from 'primeng/primeng';
@@ -18,6 +19,7 @@ import {AdvGrowlModule} from 'primeng-advanced-growl';
     DataListModule,
     DataTableModule,
     DialogModule,
+    DropdownModule,
     FormsModule,
     InputTextModule,
     InputTextareaModule,
@@ -35,9 +37,10 @@ import {AdvGrowlModule} from 'primeng-advanced-growl';
     BrowserAnimationsModule,
     ButtonModule,
     CheckboxModule,
-    DialogModule,
     DataListModule,
     DataTableModule,
+    DialogModule,
+    DropdownModule,
     FormsModule,
     InputTextModule,
     InputTextareaModule,
