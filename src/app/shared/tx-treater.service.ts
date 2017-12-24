@@ -99,7 +99,12 @@ export class TxTreaterService {
           this.nodeBalanceList[i] = etherValue;
         })
         .catch(error => {
-          console.log(error, 'Error with node ', this.nodeAddressList[i])
+          console.log(error, 'Error at getting balance of node ', this.nodeAddressList[i], '. Retrying.')
+          this.web3service.getBalance(this.nodeAddressList[i])
+          .then((balance) => {
+            let etherValue = this.web3service.toDecimal(balance);
+            this.nodeBalanceList[i] = etherValue;
+          })
         })
       )
     }
@@ -112,7 +117,13 @@ export class TxTreaterService {
             this.nodeTokenBalanceList[i] = tokenValue;
           })
           .catch(error => {
-            console.log(error, 'Error with node ', this.nodeAddressList[i])
+            console.log(error, 'Error at getting token Balance of node ', this.nodeAddressList[i], '. Retrying.')
+            this.web3service.getERC20balance(erc20contract, this.nodeAddressList[i])
+            .then((balance) => {
+              let tokenValue = this.web3service.toDecimal(balance);
+              this.nodeTokenBalanceList[i] = tokenValue;
+            })
+
           })
         )
       }
