@@ -28,7 +28,10 @@ import { TokenObserverComponent } from './token-observer/token-observer.componen
 import { TokenObserverOptionsComponent } from './token-observer/token-observer-options/token-observer-options.component'
 
 import { FiltersComponent } from './shared/filters/filters.component';
+import { StatisticsComponent } from './shared/statistics/statistics.component';
+
 import { RelativeDatePipe } from './shared/relative_time.pipe'
+
 
 @NgModule({
   declarations: [
@@ -49,6 +52,7 @@ import { RelativeDatePipe } from './shared/relative_time.pipe'
     TokenObserverOptionsComponent,
     
     FiltersComponent,
+    StatisticsComponent,
     
     RelativeDatePipe
   ],

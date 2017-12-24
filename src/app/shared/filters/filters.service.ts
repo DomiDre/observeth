@@ -2,12 +2,10 @@ import { Injectable } from '@angular/core';
 import { TxTreaterService } from '../tx-treater.service';
 import { Observable } from 'rxjs';
 import { Subject } from 'rxjs/Subject';
-import { Filters } from './filters';
 
 @Injectable()
 export class FiltersService {
 
-  public filters = Filters;
   public filterValue:number; 
   public activeFilterList: Array<string>; // string list of all active filters 
   public availableFilters: Array<string>=[];
@@ -17,8 +15,9 @@ export class FiltersService {
   public coinSymbol: string = 'Ξ';
 
   public TokenMode: boolean = false;
+  public validity_checks: { (tx: any): boolean}[] = [];
+
   constructor(private txtreaterService: TxTreaterService) {
-    this.setAvailableFilters();
   }
 
   setTokenMode(state:boolean): void {
@@ -29,79 +28,55 @@ export class FiltersService {
       this.TokenMode = false;
       this.coinSymbol = 'Ξ';
     }
-    this.setAvailableFilters();
   }
 
-  setAvailableFilters(): void {
-    this.availableFilters = [];
-    for(let filter in this.filters) {
-      if(filter == '') continue
-      if(!this.TokenMode && this.filters[filter].tokenFilter) continue
-      this.availableFilters.push(filter);
-    }
-  }
 
   toggleHidingSidebar(): void {
     this.subject.next();
   }
 
-  getActiveFilterList(): Array<string> {
-    return this.activeFilterList;
-  }
-  get validity_checks(): { (tx: any): boolean}[]{
+  updateActiveFilters(filters: any): void {
     this.activeFilterList = [];
-    let validity_checks = [];
-    if (this.filters['MinTxVol'].set) {
-      this.activeFilterList.push('Transaction volume >= ' + this.filters['MinTxVol'].value + ' ' + this.coinSymbol);
-      validity_checks.push((tx) => tx.value/this.txtreaterService.tokenDecimals >= this.filters['MinTxVol'].value);
+    this.validity_checks = [];
+    if (filters['MinTxVol'].set) {
+      this.activeFilterList.push('Transaction volume >= ' + filters['MinTxVol'].value + ' ' + this.coinSymbol);
+      this.validity_checks.push((tx) => tx.value/this.txtreaterService.tokenDecimals >= filters['MinTxVol'].value);
     }
     
-    if (this.filters['MinEthBalanceFrom'].set) {
-      this.activeFilterList.push('Ether balance of transaction sender >= ' + this.filters['MinEthBalanceFrom'].value + ' Ξ');
-      validity_checks.push((tx) => this.txtreaterService.nodeBalanceList[tx.from]/1e18 >= this.filters['MinEthBalanceFrom'].value);
+    if (filters['MinEthBalanceFrom'].set) {
+      this.activeFilterList.push('Ether balance of transaction sender >= ' + filters['MinEthBalanceFrom'].value + ' Ξ');
+      this.validity_checks.push((tx) => this.txtreaterService.nodeBalanceList[tx.from]/1e18 >= filters['MinEthBalanceFrom'].value);
     }
 
-    if (this.filters['MinEthBalanceTo'].set) {
-      this.activeFilterList.push('Ether balance of transaction receiver >= ' + this.filters['MinEthBalanceTo'].value + ' Ξ');
-      validity_checks.push((tx) => this.txtreaterService.nodeBalanceList[tx.to]/1e18 >= this.filters['MinEthBalanceTo'].value);
+    if (filters['MinEthBalanceTo'].set) {
+      this.activeFilterList.push('Ether balance of transaction receiver >= ' + filters['MinEthBalanceTo'].value + ' Ξ');
+      this.validity_checks.push((tx) => this.txtreaterService.nodeBalanceList[tx.to]/1e18 >= filters['MinEthBalanceTo'].value);
     }
 
-    if (this.filters['MinEthBalance'].set) {
-      this.activeFilterList.push('Ether balance of nodes >= ' + this.filters['MinEthBalance'].value + ' Ξ');
-      validity_checks.push((tx) => this.txtreaterService.nodeBalanceList[tx.to]/1e18 >= this.filters['MinEthBalance'].value);
-      validity_checks.push((tx) => this.txtreaterService.nodeBalanceList[tx.from]/1e18 >= this.filters['MinEthBalance'].value);
+    if (filters['MinEthBalance'].set) {
+      this.activeFilterList.push('Ether balance of nodes >= ' + filters['MinEthBalance'].value + ' Ξ');
+      this.validity_checks.push((tx) => this.txtreaterService.nodeBalanceList[tx.to]/1e18 >= filters['MinEthBalance'].value);
+      this.validity_checks.push((tx) => this.txtreaterService.nodeBalanceList[tx.from]/1e18 >= filters['MinEthBalance'].value);
     }
     
     if(this.TokenMode) {
-      if (this.filters['MinTokBalanceFrom'].set) {
-        this.activeFilterList.push('From node token balance >= ' + this.filters['MinTokBalanceFrom'].value + ' ' + this.coinSymbol);
-        validity_checks.push((tx) => this.txtreaterService.nodeBalanceList[tx.from]/this.txtreaterService.tokenDecimals >= this.filters['MinTokBalanceFrom'].value);
+      if (filters['MinTokBalanceFrom'].set) {
+        this.activeFilterList.push('From node token balance >= ' + filters['MinTokBalanceFrom'].value + ' ' + this.coinSymbol);
+        this.validity_checks.push((tx) => this.txtreaterService.nodeBalanceList[tx.from]/this.txtreaterService.tokenDecimals >= filters['MinTokBalanceFrom'].value);
       }
 
-      if (this.filters['MinTokBalanceTo'].set) {
-        this.activeFilterList.push('To node token balance >= ' + this.filters['MinTokBalanceTo'].value + ' ' + this.coinSymbol);
-        validity_checks.push((tx) => this.txtreaterService.nodeBalanceList[tx.to]/this.txtreaterService.tokenDecimals >= this.filters['MinTokBalanceTo'].value);
+      if (filters['MinTokBalanceTo'].set) {
+        this.activeFilterList.push('To node token balance >= ' + filters['MinTokBalanceTo'].value + ' ' + this.coinSymbol);
+        this.validity_checks.push((tx) => this.txtreaterService.nodeBalanceList[tx.to]/this.txtreaterService.tokenDecimals >= filters['MinTokBalanceTo'].value);
       }
 
-      if (this.filters['MinTokBalance'].set) {
-        this.activeFilterList.push('Node token balance >= ' + this.filters['MinTokBalance'].value + ' ' + this.coinSymbol);
-        validity_checks.push((tx) => this.txtreaterService.nodeTokenBalanceList[tx.to]/this.txtreaterService.tokenDecimals >= this.filters['MinTokBalance'].value);
-        validity_checks.push((tx) => this.txtreaterService.nodeTokenBalanceList[tx.from]/this.txtreaterService.tokenDecimals >= this.filters['MinTokBalance'].value);
+      if (filters['MinTokBalance'].set) {
+        this.activeFilterList.push('Node token balance >= ' + filters['MinTokBalance'].value + ' ' + this.coinSymbol);
+        this.validity_checks.push((tx) => this.txtreaterService.nodeTokenBalanceList[tx.to]/this.txtreaterService.tokenDecimals >= filters['MinTokBalance'].value);
+        this.validity_checks.push((tx) => this.txtreaterService.nodeTokenBalanceList[tx.from]/this.txtreaterService.tokenDecimals >= filters['MinTokBalance'].value);
       }
     }
 
-      
-
-    // if (this.filters['MinGasPri'].set) {
-    //   this.activeFilterList.push('Gas price >= ' + this.filters['MinGasPri'].value + ' GWei');
-    //   validity_checks.push((tx) => tx.gasPrice/1e9 >= this.filters['MinGasPri'].value);
-    // }
-    
-    // if (this.filters['MinGas'].set) {
-    //   this.activeFilterList.push('Gas >= ' + this.filters['MinGas'].value);
-    //   validity_checks.push((tx) => tx.gas >= this.filters['MinGas'].value);
-    // }
-    return validity_checks;
   }
 
   filtered_transactions(nodeIds?:Array<number>, adjacencyList?: Array<any>): [Array<number>, Array<any>] {

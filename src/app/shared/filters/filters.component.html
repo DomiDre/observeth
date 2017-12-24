@@ -13,11 +13,6 @@
              (change)="filterValueChanged(selectedFilterString)"
              contenteditable="true">
         </span>
-        <span *ngIf="selectedFilterString">
-          <button type="button" class="btn btn-secondary"
-            (click)="updateFilters()">Add</button>
-        </span>
-
       </div>
     </div>
     <div *ngIf="selectedFilterString">

@@ -31,7 +31,11 @@
                 (click)="toggleFreeze()">Freeze</button>
         <button *ngIf="!isLiveUpdating" type="button" class="btn btn-secondary"
                 (click)="toggleFreeze()">Unfreeze</button>
+        <span class="input-group-btn" style="width:100%;"></span>
+        <button type="button" class="btn btn-secondary"
+                (click)="toggleStatistics()">Show Statistics</button>
   </div>
 </div>
 
 <app-filters></app-filters>
+<app-statistics></app-statistics>

@@ -53,5 +53,6 @@ import {AdvGrowlModule} from 'primeng-advanced-growl';
     TooltipModule,
   ],
   providers: [],
+  declarations: [],
 })
 export class PrimeNgModule { }

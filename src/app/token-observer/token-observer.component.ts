@@ -11,11 +11,14 @@ import { Subscription } from 'rxjs/Subscription';
 import { FiltersComponent } from '../shared/filters/filters.component';
 import { FiltersService } from '../shared/filters/filters.service';
 
+import { StatisticsComponent } from '../shared/statistics/statistics.component';
+import { StatisticsService } from '../shared/statistics/statistics.service';
+
 @Component({
   selector: 'app-token-observer',
   templateUrl: './token-observer.component.html',
   styleUrls: ['./token-observer.component.css'],
-  providers: [ OptionsService, FiltersService ]
+  providers: [ OptionsService, FiltersService, StatisticsService ]
 })
 export class TokenObserverComponent implements OnInit, OnDestroy {
 
@@ -33,8 +36,9 @@ export class TokenObserverComponent implements OnInit, OnDestroy {
 
   private ERC20_contract: any;
 
-  private subscription: Subscription;
+  private subscription_options: Subscription;
   private subscription_filter: Subscription;
+  private subscription_statistics: Subscription;
 
   public filtered_nodeId: Array<any>;
   public filtered_adjacencyList: Array<any>;
@@ -45,10 +49,11 @@ export class TokenObserverComponent implements OnInit, OnDestroy {
               private txtreaterService: TxTreaterService,
               private element: ElementRef,
               private optionService: OptionsService,
-              private filtersService: FiltersService) { }
+              private filtersService: FiltersService,
+              private statisticsService: StatisticsService) { }
 
   ngOnInit() {
-    this.subscription = this.optionService.connectObservable()
+    this.subscription_options = this.optionService.connectObservable()
     .subscribe((data) => {
       this.tokenContractAddress = data.contractAddress;
       this.firstBlockNumber = data.from;
@@ -62,14 +67,19 @@ export class TokenObserverComponent implements OnInit, OnDestroy {
         this.updatePlot()
       }
     })
+
+    this.subscription_statistics = this.statisticsService.connectObservable()
+    .subscribe(() => {})
+
     this.mindmap = new Mindmap(this.zone, this.txtreaterService);
     this.filtersService.setTokenMode(true);
     this.toggleOptions();
   }
 
   ngOnDestroy() {
-    this.subscription.unsubscribe();
+    this.subscription_options.unsubscribe();
     this.subscription_filter.unsubscribe();
+    this.subscription_statistics.unsubscribe();
   }
 
   updateData(): void {
@@ -151,6 +161,10 @@ export class TokenObserverComponent implements OnInit, OnDestroy {
 
   toggleFilters(): void {
     this.filtersService.openFilters();
+  }
+  
+  toggleStatistics(): void {
+    this.statisticsService.openStatistics();    
   }
 }
       

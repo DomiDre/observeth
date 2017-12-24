@@ -23,6 +23,10 @@ export class TxTreaterService {
   public edges: Array<any> = []; // contains all data to plot edges
   public network_statistics = {}
 
+  public plotted_node_ids = [];
+  public plotted_adjacency_list = [];
+
+
   constructor(private web3service: Web3ConnectService) { }
 
   reset_lists(): void {
@@ -134,6 +138,8 @@ export class TxTreaterService {
     if (nodeIdList === undefined) {
       nodeIdList = this.nodeIdList;
     }
+    this.plotted_node_ids = nodeIdList;
+    
     this.nodes = [];
     for(let i=0; i<nodeIdList.length; i++){
       let node_id: number = nodeIdList[i];
@@ -161,7 +167,9 @@ export class TxTreaterService {
 
   setEdgeList(nodeAdjacencyList?: Array<any>): void {
     if (nodeAdjacencyList === undefined) nodeAdjacencyList = this.nodeAdjacencyList;
-
+    
+    this.plotted_adjacency_list = nodeAdjacencyList;
+    
     this.edges = [];
     for (let i=0; i<nodeAdjacencyList.length; i++) {
       let adjacency_list = nodeAdjacencyList[i];

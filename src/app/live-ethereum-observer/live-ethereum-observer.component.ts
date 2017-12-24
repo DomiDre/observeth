@@ -10,12 +10,14 @@ import { Mindmap } from '../shared/mindmap';
 import { FiltersComponent } from '../shared/filters/filters.component';
 import { FiltersService } from '../shared/filters/filters.service';
 
+import { StatisticsComponent } from '../shared/statistics/statistics.component';
+import { StatisticsService } from '../shared/statistics/statistics.service';
 
 @Component({
   selector: 'app-live-ethereum-observer',
   templateUrl: './live-ethereum-observer.component.html',
   styleUrls: ['./live-ethereum-observer.component.css'],
-  providers: [ FiltersService ]
+  providers: [ FiltersService, StatisticsService ]
 })
 export class LiveEthereumObserverComponent implements OnInit, OnDestroy {
 
@@ -31,19 +33,25 @@ export class LiveEthereumObserverComponent implements OnInit, OnDestroy {
   public displayOptions: boolean = false;
 
   private subscription_filter: Subscription;
+  private subscription_statistics: Subscription;
 
   constructor(private zone: NgZone,
               private web3service: Web3ConnectService,
               private router: Router,
               private element: ElementRef,
+              private txtreaterService: TxTreaterService,
               private filtersService: FiltersService,
-              private txtreaterService: TxTreaterService) { }
+              private statisticsService: StatisticsService) { }
 
   ngOnInit() {
     this.subscription_filter = this.filtersService.connectObservable()
     .subscribe(() => {
-      //
+      this.updateDisplayData();
     });
+
+    this.subscription_statistics = this.statisticsService.connectObservable()
+    .subscribe(() => {})
+
     this.txtreaterService.disableTokenSetup();
     this.filtersService.setTokenMode(false);
     this.mindmap = new Mindmap(this.zone, this.txtreaterService);
@@ -101,6 +109,10 @@ export class LiveEthereumObserverComponent implements OnInit, OnDestroy {
 
   toggleOptions(): void {
     this.filtersService.openFilters();
+  }
+
+  toggleStatistics(): void {
+    this.statisticsService.openStatistics();    
   }
 
 }

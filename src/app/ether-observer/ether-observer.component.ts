@@ -11,11 +11,14 @@ import { Subscription } from 'rxjs/Subscription';
 import { FiltersComponent } from '../shared/filters/filters.component';
 import { FiltersService } from '../shared/filters/filters.service';
 
+import { StatisticsComponent } from '../shared/statistics/statistics.component';
+import { StatisticsService } from '../shared/statistics/statistics.service';
+
 @Component({
   selector: 'app-ether-observer',
   templateUrl: './ether-observer.component.html',
   styleUrls: ['./ether-observer.component.css'],
-  providers: [ OptionsService, FiltersService ]
+  providers: [ OptionsService, FiltersService, StatisticsService ]
 })
 export class EtherObserverComponent implements OnInit, OnDestroy {
 
@@ -33,8 +36,9 @@ export class EtherObserverComponent implements OnInit, OnDestroy {
 
   private ERC20_contract: any;
 
-  private subscription: Subscription;
+  private subscription_options: Subscription;
   private subscription_filter: Subscription;
+  private subscription_statistics: Subscription;
 
   public filtered_nodeId: Array<any>;
   public filtered_adjacencyList: Array<any>;
@@ -44,10 +48,10 @@ export class EtherObserverComponent implements OnInit, OnDestroy {
               private txtreaterService: TxTreaterService,
               private element: ElementRef,
               private optionService: OptionsService,
-              private filtersService: FiltersService) { }
-
+              private filtersService: FiltersService,
+              private statisticsService: StatisticsService) { }
   ngOnInit() {
-    this.subscription = this.optionService.connectObservable()
+    this.subscription_options = this.optionService.connectObservable()
                         .subscribe((data) => {
                           this.firstBlockNumber = data.from;
                           this.latestBlockNumber = data.to;
@@ -61,6 +65,10 @@ export class EtherObserverComponent implements OnInit, OnDestroy {
       }
     })
 
+    this.subscription_statistics = this.statisticsService.connectObservable()
+    .subscribe(() => {})
+
+
     this.txtreaterService.disableTokenSetup();
     this.filtersService.setTokenMode(false);
     this.mindmap = new Mindmap(this.zone, this.txtreaterService);
@@ -70,8 +78,9 @@ export class EtherObserverComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subscription.unsubscribe();
+    this.subscription_options.unsubscribe();
     this.subscription_filter.unsubscribe();
+    this.subscription_statistics.unsubscribe();
   }
 
   updateData(): void {
@@ -132,5 +141,9 @@ export class EtherObserverComponent implements OnInit, OnDestroy {
 
   toggleFilters(): void {
     this.filtersService.openFilters();    
+  }
+
+  toggleStatistics(): void {
+    this.statisticsService.openStatistics();    
   }
 }
