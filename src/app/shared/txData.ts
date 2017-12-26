@@ -5,4 +5,6 @@ export class TXData {
   to: string;
   gasPrice:number;
   gas:number;
+  blockNumber: number;
+  timeStamp: number;
 }

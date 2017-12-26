@@ -9,7 +9,7 @@ import { NoMetamaskComponent } from './no-metamask/no-metamask.component';
 import { LiveEthereumObserverComponent } from './live-ethereum-observer/live-ethereum-observer.component';
 import { EtherObserverComponent } from './ether-observer/ether-observer.component';
 import { TokenObserverComponent } from './token-observer/token-observer.component';
-
+import { MywalletComponent } from './mywallet/mywallet.component';
 const routes: Routes = [
   { path: '', redirectTo: '/main', pathMatch: 'full'},
   { path: 'main', component:MainComponent},
@@ -19,7 +19,8 @@ const routes: Routes = [
   { path: 'Donate', component:DonateComponent},
   { path: 'Testpage', component:TestpageComponent},
   { path: 'NoMetamask', component:NoMetamaskComponent},
-  { path: 'LiveEtherWatch', component: LiveEthereumObserverComponent}
+  { path: 'LiveEtherWatch', component: LiveEthereumObserverComponent},
+  { path: 'MyWallet', component: MywalletComponent}
 ];
 
 @NgModule({  

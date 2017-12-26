@@ -1,0 +1,30 @@
+<div class='header'>
+  <h2>Observe My Wallet</h2>
+</div>
+
+
+<div id="container_mindmap">
+  <div id="Mindmap"></div>
+  <div id="loading" *ngIf="mindmap.in_loading_status">
+    <div id='loading_info_text'>{{mindmap.status}}</div>
+    <div class="loader"></div> 
+  </div>
+</div>
+
+<div class='footer'>
+  <div class='input-group'>
+    <button type="button" class="btn btn-secondary"
+                (click)="toggleFilters()">Filter</button>
+    <span class="input-group-btn" style="width:5px;"></span>
+    <button type="button" class="btn btn-secondary"
+            (click)="toggleOptions()">Options</button>
+    <span class="input-group-btn" style="width:100%;"></span>
+    <button type="button" class="btn btn-secondary"
+            (click)="toggleStatistics()">Show Statistics</button>
+
+  </div>
+</div>
+
+<app-mywallet-options></app-mywallet-options>
+<app-filters></app-filters>
+<app-statistics></app-statistics> 

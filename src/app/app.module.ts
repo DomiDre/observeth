@@ -2,6 +2,8 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
+import { DatePipe } from '@angular/common';
 
 import { ParticlesModule } from 'angular-particle';
 
@@ -30,7 +32,9 @@ import { TokenObserverOptionsComponent } from './token-observer/token-observer-o
 import { FiltersComponent } from './shared/filters/filters.component';
 import { StatisticsComponent } from './shared/statistics/statistics.component';
 
-import { RelativeDatePipe } from './shared/relative_time.pipe'
+import { RelativeDatePipe } from './shared/relative_time.pipe';
+import { MywalletComponent } from './mywallet/mywallet.component';
+import { MywalletOptionsComponent } from './mywallet/mywallet-options/mywallet-options.component'
 
 
 @NgModule({
@@ -54,7 +58,11 @@ import { RelativeDatePipe } from './shared/relative_time.pipe'
     FiltersComponent,
     StatisticsComponent,
     
-    RelativeDatePipe
+    RelativeDatePipe,
+    
+    MywalletComponent,
+    
+    MywalletOptionsComponent
   ],
   imports: [
     BrowserModule,
@@ -62,10 +70,12 @@ import { RelativeDatePipe } from './shared/relative_time.pipe'
     PrimeNgModule,
     FormsModule,
     ParticlesModule,
-    AppRoutingModule
+    AppRoutingModule,
+    HttpClientModule
   ],
   providers: [Web3ConnectService,
-              TxTreaterService],
+              TxTreaterService,
+              DatePipe],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

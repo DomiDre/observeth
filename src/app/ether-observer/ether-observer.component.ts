@@ -1,9 +1,8 @@
-import { Component, OnInit, OnDestroy, Input, NgZone, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, NgZone } from '@angular/core';
 import { Web3ConnectService } from '../shared/web3-connect.service';
 import { TxTreaterService } from '../shared/tx-treater.service';
 import { TXData } from '../shared/txData';
-import * as vis from 'vis';
-import { ERC20_abi } from '../shared/erc20'
+
 import { OptionsService } from './etheroptions.service'
 import { Mindmap } from '../shared/mindmap';
 import { Subscription } from 'rxjs/Subscription';
@@ -46,7 +45,6 @@ export class EtherObserverComponent implements OnInit, OnDestroy {
   constructor(private zone: NgZone,
               private web3service: Web3ConnectService,
               private txtreaterService: TxTreaterService,
-              private element: ElementRef,
               private optionService: OptionsService,
               private filtersService: FiltersService,
               private statisticsService: StatisticsService) { }

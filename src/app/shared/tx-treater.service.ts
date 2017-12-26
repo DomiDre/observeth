@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Web3ConnectService } from '../shared/web3-connect.service';
+import { DatePipe } from '@angular/common';
 
 @Injectable()
 export class TxTreaterService {
@@ -26,8 +27,8 @@ export class TxTreaterService {
   public plotted_node_ids = [];
   public plotted_adjacency_list = [];
 
-
-  constructor(private web3service: Web3ConnectService) { }
+  constructor(private web3service: Web3ConnectService,
+              private datePipe: DatePipe) { }
 
   reset_lists(): void {
     this.nodes = new Array();
@@ -69,26 +70,20 @@ export class TxTreaterService {
     //reads a txList and sorts its entries to nodes, nodeAddressList and nodeAdjacencyList 
     for(let txData of txList) {
       if (txData == undefined) continue;
-      // read txData
-      let tx_from: string = txData.from;
-      let tx_to: string = txData.to;
-      let tx_value: number = this.web3service.toDecimal(txData.value);
-      let tx_hash: string = txData.hash;
 
       // check case of a contract creation ?
-      if (tx_to === null) tx_to = tx_from;
+      if (txData.to === null) txData.to = txData.from;
        
       // check whether FROM or TO are already in List
-      let id_from = is_id_in_List(tx_from);
-      let id_to = is_id_in_List(tx_to);
+      let id_from = is_id_in_List(txData.from);
+      let id_to = is_id_in_List(txData.to);
 
+      txData.from = id_from;
+      txData.to = id_to;
       // add entry to nodeAdjacencyList
-      this.nodeAdjacencyList[id_from].push({
-        'from': id_from,
-        'to': id_to,
-        'hash': tx_hash,
-        'value': tx_value})
+      this.nodeAdjacencyList[id_from].push(txData);
     }
+    // console.log(this.nodeAdjacencyList)
     this.status = 'Fetching Node Balances'
     let promisesBalance = [];
     for(let i=0; i<this.nodeAddressList.length; i++) {
@@ -133,16 +128,16 @@ export class TxTreaterService {
 
   getNodeSize(value): number {
     let relative_value: number = value / this.coin_supply;
-    if (relative_value > 1e-4) return 25
-    else if (1e-7 > relative_value) return 5
-    else return (relative_value - 1e-7) * (25-5)/(1e-4 - 1e-7) + 5
+    if (relative_value > 1e-6) return 25
+    else if (1e-11 > relative_value) return 5
+    else return (relative_value - 1e-11) * (25-5)/(1e-6 - 1e-11) + 5
   }
 
   getEdgeSize(value): number {
     let relative_value: number = value / this.coin_supply;
-    if (relative_value > 1e-5) return 2.5
-    else if (1e-8 > relative_value) return 0.5
-    else return (relative_value - 1e-8) * (2.5-0.5)/(1e-5 - 1e-8) + 0.5
+    if (relative_value > 1e-6) return 5
+    else if (1e-11 > relative_value) return 0.5
+    else return (relative_value - 1e-11) * (5-0.5)/(1e-6 - 1e-11) + 0.5
   }
 
   setNodeList(nodeIdList?: Array<any>): void{
@@ -167,7 +162,7 @@ export class TxTreaterService {
       }
       this.nodes.push({
         id: nodeIdList[i],
-        label: this.nodeAddressList[node_id].slice(0, 8),
+        // label: this.nodeAddressList[node_id].slice(0, 8),
         size: size,
         url: 'https://etherscan.io/address/'+this.nodeAddressList[node_id],
         title: title
@@ -180,20 +175,29 @@ export class TxTreaterService {
     if (nodeAdjacencyList === undefined) nodeAdjacencyList = this.nodeAdjacencyList;
     
     this.plotted_adjacency_list = nodeAdjacencyList;
-    
     this.edges = [];
     for (let i=0; i<nodeAdjacencyList.length; i++) {
       let adjacency_list = nodeAdjacencyList[i];
+      
       if (adjacency_list === undefined) continue;
       for(let j=0; j<adjacency_list.length;j++) {
         let edge = adjacency_list[j];
-        let title: string = 'TX: '+ edge.hash + '<br> Value: ';
-        if (this.tokenLoaded) title = title + edge.value/this.tokenDecimals + ' ' + this.tokenSymbol
-        else title = title + edge.value/1e18 + ' Ξ'
+        let title: string = 'TX: '+ edge.hash;
+        if(edge.blockNumber!==undefined) {
+          title = title + '<br> BlockNumber ' + edge.blockNumber;
+          title = title + ' @ ' + this.datePipe.transform(edge.timeStamp, 'medium');
+        };
+        
+        if(edge.gas!==undefined) title = title + '<br> Gas: ' + edge.gas;
+        if(edge.gasPrice!==undefined)  title = title + '<br> GasPrice ' + edge.gasPrice/1e9 + ' GWei';
+        
+        if (this.tokenLoaded) title = title + '<br> Value: ' + edge.value/this.tokenDecimals + ' ' + this.tokenSymbol;
+        else title = title + '<br> Value: ' + edge.value/1e18 + ' Ξ';
+        
         this.edges.push({
           from: edge.from, 
           to: edge.to,
-          label: edge.hash.slice(0,8),
+          // label: edge.hash.slice(0,8),
           title: title,
           width: this.getEdgeSize(edge.value),
           url:  'https://etherscan.io/tx/'+edge.hash
