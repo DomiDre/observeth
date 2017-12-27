@@ -35,15 +35,25 @@ export class TestpageComponent implements OnInit {
   }
 
   promise_test(): void {
+    let b = () => new Promise((resolve, reject) => {
+      console.log(20)
+      setTimeout(() => resolve(), 1000);
+    })
+
+    let a = () => new Promise((resolve, reject) => {
+      console.log(10)
+      setTimeout(() => resolve(), 1000);
+    }).then(b)
+
     new Promise((resolve, reject) => {
       console.log(0)
       setTimeout(() => resolve(1), 1000);
     }).then((result) => {
       console.log(result);
-      setTimeout(1000);
-      return 'a'
-    }).then((result) =>
-      console.log(result));
-    console.log(3)
+      return new Promise((resolve, reject) => {
+        setTimeout(() => resolve(), 1000);
+      })
+    }).then(a).then(a)
+
   }
 }

@@ -62,7 +62,7 @@ export class MywalletComponent implements OnInit {
     this.latestBlockNumber= 99999999
     this.http_get('https://api.etherscan.io/api?module=stats&action=ethsupply&apikey='+this.etherscan_token)
     .toPromise().then(res => {this.txtreaterService.coin_supply = res.result;})
-    this.tree_depth = 1;
+    this.tree_depth = 3;
 
     this.subscription_options = this.optionService.connectObservable()
                         .subscribe((data) => {
@@ -96,8 +96,34 @@ export class MywalletComponent implements OnInit {
     this.transactionList = new Array<any>();
     
     let promiseChain = [];
+    let reached_depth = 1;
     //get tx of your account as start point
-    let seedPromise = this.http_get('http://api.etherscan.io/api?module=account&action=txlist'+
+    let promiseLoop: (currentLevel: Array<any>) => Promise<any>  = (currentLevel) => {
+      if (currentLevel.length == 0) {
+        return Promise.resolve();
+      } else {
+        return new Promise((resolve, reject) => {
+          reached_depth++;
+          this.mindmap.status = 'Getting level ' + reached_depth;
+          this.get_next_level(currentLevel)
+          .then((nextLevel) => {
+            this.mindmap.status = 'Fetched tx for level ' + reached_depth + '. Evaluating';
+            let next_current_level = [];
+            for(let i=0; i<nextLevel.length; i++) {
+              let node = nextLevel[i];
+              if (node == undefined || node.tx_list == null) continue;
+              let current_level_addend =
+                this.evaluate_node(node.tx_list, node.node_address, 
+                                   node.depth, node.direction);
+              next_current_level = next_current_level.concat(current_level_addend);
+            }
+            resolve(next_current_level)
+          });
+        }).then(promiseLoop);
+      }
+    };
+
+    this.http_get('http://api.etherscan.io/api?module=account&action=txlist'+
               '&address='+this.accountAddress+
               '&startblock='+this.firstBlockNumber+
               '&endblock='+this.latestBlockNumber+
@@ -109,45 +135,40 @@ export class MywalletComponent implements OnInit {
     .then(res => {
       this.mindmap.status = 'Fetched tx for level 0. Evaluating';
       let current_level = this.evaluate_node(res.result, this.accountAddress, 0, 0);
-      if (this.tree_depth > 0) {
-        this.mindmap.status = 'Getting level 1.';
-        return this.get_next_level(current_level)
-      }
-    }).then((nextLevel)=>{
-        this.mindmap.status = 'Fetched tx for level 1. Evaluating';
-        let current_level = [];
-        for(let i=0; i<nextLevel.length; i++) {
-          let node = nextLevel[i];
-          if (node == undefined || node.tx_list == null) continue;
-          let current_level_addend =
-            this.evaluate_node(node.tx_list, node.node_address, 
-                               node.depth, node.direction);
-          current_level = current_level.concat(current_level_addend);
-        }
-        return current_level
-    }).then(current_level => {
-      this.mindmap.status = 'Getting level 2.';
-      return this.get_next_level(current_level)
-
-    }).then(nextLevel => {
-      this.mindmap.status = 'Fetched tx for level 2. Evaluating';
-      let current_level = [];
-      for(let i=0; i<nextLevel.length; i++) {
-        let node = nextLevel[i];
-        if (node == undefined || node.tx_list == null) continue;
-        let current_level_addend =
-          this.evaluate_node(node.tx_list, node.node_address, 
-                             node.depth, node.direction);
-        current_level = current_level.concat(current_level_addend);
-      }
-      return this.txtreaterService.readTxList(this.transactionList)
-    })
-    
-    promiseChain.push(seedPromise);
-    Promise.all(promiseChain)
+      return current_level
+    }).then(promiseLoop)
     .then(() => {
       return this.txtreaterService.readTxList(this.transactionList)
     }).then(() => this.updatePlot())
+
+      // {
+      //     this.mindmap.status = 'Fetched tx for level 1. Evaluating';
+      //     let current_level = [];
+      //     for(let i=0; i<nextLevel.length; i++) {
+      //       let node = nextLevel[i];
+      //       if (node == undefined || node.tx_list == null) continue;
+      //       let current_level_addend =
+      //         this.evaluate_node(node.tx_list, node.node_address, 
+      //                            node.depth, node.direction);
+      //       current_level = current_level.concat(current_level_addend);
+      //     }
+      //     return current_level
+      // }).then(current_level => {
+      //   this.mindmap.status = 'Getting level 2.';
+      //   return this.get_next_level(current_level)
+
+      // }).then(nextLevel => {
+      //   this.mindmap.status = 'Fetched tx for level 2. Evaluating';
+      //   let current_level = [];
+      //   for(let i=0; i<nextLevel.length; i++) {
+      //     let node = nextLevel[i];
+      //     if (node == undefined || node.tx_list == null) continue;
+      //     let current_level_addend =
+      //       this.evaluate_node(node.tx_list, node.node_address, 
+      //                          node.depth, node.direction);
+      //     current_level = current_level.concat(current_level_addend);
+      //   }
+      // })
   }
 
   http_get(request: string): Observable<any> {
@@ -169,6 +190,7 @@ export class MywalletComponent implements OnInit {
   }
 
   evaluate_node(tx_list, node_address: string, depth:number, direction: number): Array<any> {
+    //sync method
     let added_inc_addresses = [];
     let added_out_addresses = [];
     let outgoing_tx: boolean;
