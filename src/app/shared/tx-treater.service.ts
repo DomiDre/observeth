@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Web3ConnectService } from '../shared/web3-connect.service';
 import { DatePipe } from '@angular/common';
+import { EtherWallets } from './wallets';
+import { ERC20_tokens } from './erc20';
 
 @Injectable()
 export class TxTreaterService {
@@ -26,9 +28,14 @@ export class TxTreaterService {
 
   public plotted_node_ids = [];
   public plotted_adjacency_list = [];
+  public etherWallets = EtherWallets;
 
   constructor(private web3service: Web3ConnectService,
-              private datePipe: DatePipe) { }
+              private datePipe: DatePipe) { 
+    for(let erc20token of ERC20_tokens) {
+      this.etherWallets[erc20token.address] = erc20token.name + ' contract'
+    }
+  }
 
   reset_lists(): void {
     this.nodes = new Array();
@@ -146,10 +153,15 @@ export class TxTreaterService {
     }
     this.plotted_node_ids = nodeIdList;
     
+    // prepare wallet list
     this.nodes = [];
     for(let i=0; i<nodeIdList.length; i++){
       let node_id: number = nodeIdList[i];
-      let title: string =
+      let title: string = '';
+      if (this.etherWallets[this.nodeAddressList[node_id]] != undefined){
+        title = title + this.etherWallets[this.nodeAddressList[node_id]] + '<br>'
+      }
+      title = title +
         'Wallet: '+ this.nodeAddressList[node_id] + '<br>'+
         'Ether Balance: ' + this.nodeBalanceList[node_id]/1e18 + '  Ξ';
       let size: number;

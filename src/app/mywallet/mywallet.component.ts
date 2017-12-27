@@ -43,6 +43,7 @@ export class MywalletComponent implements OnInit {
   public filtered_adjacencyList: Array<any>;
 
   public max_reached_depth: number = 0;
+  public current_level_tx: any;
 
   constructor(private zone: NgZone,
               private web3service: Web3ConnectService,
@@ -57,11 +58,11 @@ export class MywalletComponent implements OnInit {
 
   ngOnInit() {
     this.accountAddress = '0x465fA41ce86e23d808a402e82D2b87eD19eeB282'.toLowerCase();
-    this.firstBlockNumber = 0//4700000
+    this.firstBlockNumber = 0
     this.latestBlockNumber= 99999999
     this.http_get('https://api.etherscan.io/api?module=stats&action=ethsupply&apikey='+this.etherscan_token)
     .toPromise().then(res => {this.txtreaterService.coin_supply = res.result;})
-    this.tree_depth = 2;
+    this.tree_depth = 1;
 
     this.subscription_options = this.optionService.connectObservable()
                         .subscribe((data) => {
@@ -94,8 +95,9 @@ export class MywalletComponent implements OnInit {
     this.mindmap.status = 'Reading address ' + this.accountAddress;
     this.transactionList = new Array<any>();
     
+    let promiseChain = [];
     //get tx of your account as start point
-    this.http_get('http://api.etherscan.io/api?module=account&action=txlist'+
+    let seedPromise = this.http_get('http://api.etherscan.io/api?module=account&action=txlist'+
               '&address='+this.accountAddress+
               '&startblock='+this.firstBlockNumber+
               '&endblock='+this.latestBlockNumber+
@@ -105,14 +107,47 @@ export class MywalletComponent implements OnInit {
               '&offset=100')
     .toPromise()
     .then(res => {
-      let tx_list = res.result;
-      this.mindmap.status = 'Reading & Sorting transactions...';
-      this.recursive_eval_tx_list(tx_list, this.accountAddress, 0, 0)
-      .then(() => {
-        console.log('All done. Max reached depth: ' + this.max_reached_depth)
-        return this.txtreaterService.readTxList(this.transactionList)
-      }).then(() => this.updatePlot())
+      this.mindmap.status = 'Fetched tx for level 0. Evaluating';
+      let current_level = this.evaluate_node(res.result, this.accountAddress, 0, 0);
+      if (this.tree_depth > 0) {
+        this.mindmap.status = 'Getting level 1.';
+        return this.get_next_level(current_level)
+      }
+    }).then((nextLevel)=>{
+        this.mindmap.status = 'Fetched tx for level 1. Evaluating';
+        let current_level = [];
+        for(let i=0; i<nextLevel.length; i++) {
+          let node = nextLevel[i];
+          if (node == undefined || node.tx_list == null) continue;
+          let current_level_addend =
+            this.evaluate_node(node.tx_list, node.node_address, 
+                               node.depth, node.direction);
+          current_level = current_level.concat(current_level_addend);
+        }
+        return current_level
+    }).then(current_level => {
+      this.mindmap.status = 'Getting level 2.';
+      return this.get_next_level(current_level)
+
+    }).then(nextLevel => {
+      this.mindmap.status = 'Fetched tx for level 2. Evaluating';
+      let current_level = [];
+      for(let i=0; i<nextLevel.length; i++) {
+        let node = nextLevel[i];
+        if (node == undefined || node.tx_list == null) continue;
+        let current_level_addend =
+          this.evaluate_node(node.tx_list, node.node_address, 
+                             node.depth, node.direction);
+        current_level = current_level.concat(current_level_addend);
+      }
+      return this.txtreaterService.readTxList(this.transactionList)
     })
+    
+    promiseChain.push(seedPromise);
+    Promise.all(promiseChain)
+    .then(() => {
+      return this.txtreaterService.readTxList(this.transactionList)
+    }).then(() => this.updatePlot())
   }
 
   http_get(request: string): Observable<any> {
@@ -129,14 +164,135 @@ export class MywalletComponent implements OnInit {
     txEntry.gasPrice = tx_element.gasPrice;
     txEntry.blockNumber = tx_element.blockNumber;
     txEntry.timeStamp = tx_element.timeStamp*1000;
+    if ((txEntry.from != undefined) && txEntry.to != undefined)
+      this.transactionList.push(txEntry);
+  }
 
-    this.transactionList.push(txEntry);
+  evaluate_node(tx_list, node_address: string, depth:number, direction: number): Array<any> {
+    let added_inc_addresses = [];
+    let added_out_addresses = [];
+    let outgoing_tx: boolean;
+    
+    let next_level_tx: Array<any> = []; 
+    for(let i=0; i<tx_list.length; i++) {
+      let from = tx_list[i].from;
+      let to = tx_list[i].to;
+      outgoing_tx = (from == node_address);
+
+      // check if its multiple tx with another node
+      if (outgoing_tx) {
+        if (added_out_addresses.indexOf(to) > -1) continue; // already in list
+        else added_out_addresses.push(to);
+      } else {
+        if (added_inc_addresses.indexOf(from) > -1) continue; // already in list
+        else added_inc_addresses.push(from);
+      }
+
+      if (from == to) { // contract creation or pointing to itself
+        this.add_tx_to_txList(tx_list[i]);
+        continue
+      }
+      
+      if ((direction < 0 && outgoing_tx) || (direction > 0 && !outgoing_tx)) 
+        continue;
+      else { // these are the tx of interest: moving into the direction of interest
+        this.add_tx_to_txList(tx_list[i]);
+        
+        if (depth < this.tree_depth) {
+          if (outgoing_tx) 
+            next_level_tx.push({
+              'node_address': to,
+              'direction': 1,
+              'depth': depth+1,
+              'blockNumber': tx_list[i].blockNumber
+            })
+          else
+            next_level_tx.push({
+              'node_address': from,
+              'direction': -1,
+              'depth': depth+1,
+              'blockNumber': tx_list[i].blockNumber
+            })
+        }
+      }
+    }
+    return next_level_tx;
+  }
+
+  get_outgoing_tx(node_address, blockNumber): Promise<any> {
+    return this.http_get('http://api.etherscan.io/api?module=account&action=txlist'+
+      '&address='+node_address+
+      '&startblock='+blockNumber+
+      '&endblock='+this.latestBlockNumber+
+      '&sort=asc'+
+      '&apikey='+this.etherscan_token+
+      '&page=1'+
+      '&offset=100')
+      .toPromise()
+  }
+  
+  get_incoming_tx(node_address, blockNumber): Promise<any> {
+    return this.http_get('http://api.etherscan.io/api?module=account&action=txlist'+
+      '&address='+node_address+
+      '&startblock='+this.firstBlockNumber+
+      '&endblock='+blockNumber+
+      '&sort=desc'+
+      '&apikey='+this.etherscan_token+
+      '&page=1'+
+      '&offset=100')
+      .toPromise()
+  }
+
+  get_tx(node_address, blockNumber, direction): Promise<any> {
+    if (direction > 0) {
+      return this.get_outgoing_tx(node_address, blockNumber);
+    } else {
+      return this.get_incoming_tx(node_address, blockNumber);
+    }
+  }
+
+  PromiseLoopGetTx(i, tx, callback): Promise<any> {
+    return this.get_tx(tx.node_address, tx.blockNumber, tx.direction)
+    .then((res) => callback(res, i, tx))
+    .catch((err) => {console.log('Error while getting ' + i + '. Waiting 1s and retrying.');
+                     setTimeout(1000);
+                     this.PromiseLoopGetTx(i, tx, callback)})
+  }
+
+  get_next_level(current_level_tx: Array<any>): Promise<any> {
+    let PromiseList = [];
+    let nextLevel: Array<any> = [];
+    let nodes_left: number;
+    let errous_nodes: Array<any> = [];
+
+    let total_nodes: number = current_level_tx.length;
+    nodes_left = total_nodes;
+
+    let callback = (res, i, tx) => {
+      nodes_left--;
+      this.mindmap.status = 'Treating depth ' + tx.depth + '. Still need to get data for ' + nodes_left + ' nodes.'
+      nextLevel[i] = {
+        'tx_list': res.result,
+        'direction': tx.direction,
+        'depth': tx.depth,
+        'node_address': tx.node_address
+      }
+    }
+
+    for(let i=0; i<total_nodes; i++)
+      PromiseList.push(this.PromiseLoopGetTx(i, current_level_tx[i], callback));
+
+    return Promise.all(PromiseList)
+    .then(result => {
+      return nextLevel
+    });
   }
 
   recursive_eval_tx_list(tx_list, node_address: string, depth:number, direction: number): Promise<any> {
     if (depth > this.max_reached_depth) {
       this.max_reached_depth = depth;
-      this.mindmap.status = 'Reading & Sorting transactions... Depth level reached: '+depth;
+      this.mindmap.status = 'Reading & Sorting transactions... Depth level reached: '+depth+'/'+this.tree_depth+
+                            '\nThis might take a few minutes...';
     }
     console.log('Depth: ', depth);
 
