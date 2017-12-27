@@ -13,6 +13,8 @@ import { FiltersService } from '../shared/filters/filters.service';
 import { StatisticsComponent } from '../shared/statistics/statistics.component';
 import { StatisticsService } from '../shared/statistics/statistics.service';
 
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs'
 @Component({
   selector: 'app-live-ethereum-observer',
   templateUrl: './live-ethereum-observer.component.html',
@@ -41,7 +43,8 @@ export class LiveEthereumObserverComponent implements OnInit, OnDestroy {
               private element: ElementRef,
               private txtreaterService: TxTreaterService,
               private filtersService: FiltersService,
-              private statisticsService: StatisticsService) { }
+              private statisticsService: StatisticsService,
+              private http: HttpClient) { }
 
   ngOnInit() {
     this.subscription_filter = this.filtersService.connectObservable()
@@ -55,15 +58,23 @@ export class LiveEthereumObserverComponent implements OnInit, OnDestroy {
     this.txtreaterService.disableTokenSetup();
     this.filtersService.setTokenMode(false);
     this.mindmap = new Mindmap(this.zone, this.txtreaterService);
-    this.txtreaterService.coin_supply = 96519270; // don't hardcode this
+    this.http_get('https://api.etherscan.io/api?module=stats&action=ethsupply&apikey=8FWC8GZWSE8SJKY7NBSE77XER4KQ8NXK1Z')
+    .toPromise().then(res => {this.txtreaterService.coin_supply = res.result;})
     this.isLiveUpdating = true;
 
     if (!this.web3service.isConnected()) this.router.navigateByUrl('/NoMetamask');
     else this.initializeDataCollection()
   }
+  
+  http_get(request: string): Observable<any> {
+    return this.http.get(request);
+  }
 
   ngOnDestroy() {
     this.subscription_filter.unsubscribe();
+    this.subscription_statistics.unsubscribe();
+    this.isLiveUpdating = false;
+    this.timer.unsubscribe();
   }
 
   initializeDataCollection(): void {

@@ -16,8 +16,9 @@ export class MywalletOptionsService {
     this.showOptions = true;
   }
 
-  requestingData(contractAddress: string, from: number, to: number): void {
-    this.subject.next({contractAddress, from, to})
+  requestingData(contractAddress: string, from: number, to: number,
+                 treeDepth: number, maxTXperNode: number): void {
+    this.subject.next({contractAddress, from, to, treeDepth, maxTXperNode})
   }
 
   connectObservable(): Observable<any> {

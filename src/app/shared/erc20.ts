@@ -18,6 +18,30 @@ export var ERC20_tokens: any = [
     "logo": "airswap.png"
   },
   {
+    "name": 'Basic Attention Token',
+    "symbol": "BAT",
+    "address": '0x0d8775f648430679a709e98d2b0cb6250d2887ef',
+    "logo": "bat.png"
+  },
+  {
+    "name": 'Civic',
+    "symbol": "CVC",
+    "address": '0x41e5560054824ea6b0732e656e3ad64e20e94e45',
+    "logo": "civic.png"
+  },
+  {
+    "name": 'Digix Global',
+    "symbol": "DGD",
+    "address": '0xe0b7927c4af23765cb51314a0e0521a9645f0e2a',
+    "logo": "digix.png"
+  },
+  {
+    "name": 'EOS',
+    "symbol": "EOS",
+    "address": '0x86fa049857e0209aa7d9e616f7eb3b3b78ecfdb0',
+    "logo": "eos.png"
+  },
+  {
     "name": 'Golem',
     "symbol": "GNT",
     "address": '0xa74476443119A942dE498590Fe1f2454d7D4aC0d',
@@ -42,6 +66,12 @@ export var ERC20_tokens: any = [
     "logo": "omisego.png"
   },
   {
+    "name": 'Qtum',
+    "symbol": "QTUM",
+    "address": '0x9a642d6b3368ddc662CA244bAdf32cDA716005BC',
+    "logo": "qtum.png"
+  },
+  {
     "name": 'Raiden',
     "symbol": "RDN",
     "address": '0x255aa6df07540cb5d3d297f0d0d4d84cb52bc8e6',
@@ -58,6 +88,12 @@ export var ERC20_tokens: any = [
     "symbol": "RCN",
     "address": '0xf970b8e36e23f7fc3fd752eea86f8be8d83375a6',
     "logo": "ripio.png"
+  },
+  {
+    "name": 'Santiment',
+    "symbol": "SAN",
+    "address": '0x7c5a0ce9267ed19b22f8cae653f198e3e8daf098',
+    "logo": "santiment.png"
   },
   {
     "name": 'StatusNetwork',

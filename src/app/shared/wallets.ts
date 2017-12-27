@@ -15,5 +15,8 @@ export var EtherWallets = {
   '0x09678741bd50c3e74301f38fbd0136307099ae5d': 'LocalEthereum.com',
   '0x6090a6e47849629b7245dfa1ca21d94cd15878ef': 'ENS-Registrar',
   '0x314159265dd8dbb310642f98f50c066173c1259b': 'ENS-EthNameService',
-
+  '0x70faa28a6b8d6829a4b1e649d26ec9a2a39ba413': 'Shapeshift',
+  '0xea674fdde714fd979de3edf0f56aa9716b898ec8': 'Ethermine',
+  '0x96fc4553a00c117c5b0bed950dd625d1c16dc894': 'Changelly',
+  '0x52bc44d5378309ee2abf1539bf71de1b7d7be3b5': 'Nanopool',
 }

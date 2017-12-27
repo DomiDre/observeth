@@ -13,6 +13,9 @@ import { FiltersService } from '../shared/filters/filters.service';
 import { StatisticsComponent } from '../shared/statistics/statistics.component';
 import { StatisticsService } from '../shared/statistics/statistics.service';
 
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs'
+
 @Component({
   selector: 'app-ether-observer',
   templateUrl: './ether-observer.component.html',
@@ -47,7 +50,8 @@ export class EtherObserverComponent implements OnInit, OnDestroy {
               private txtreaterService: TxTreaterService,
               private optionService: OptionsService,
               private filtersService: FiltersService,
-              private statisticsService: StatisticsService) { }
+              private statisticsService: StatisticsService,
+              private http: HttpClient) { }
   ngOnInit() {
     this.subscription_options = this.optionService.connectObservable()
                         .subscribe((data) => {
@@ -70,9 +74,14 @@ export class EtherObserverComponent implements OnInit, OnDestroy {
     this.txtreaterService.disableTokenSetup();
     this.filtersService.setTokenMode(false);
     this.mindmap = new Mindmap(this.zone, this.txtreaterService);
-    this.txtreaterService.coin_supply =  96519270; // don't hardcode this
+    this.http_get('https://api.etherscan.io/api?module=stats&action=ethsupply&apikey=8FWC8GZWSE8SJKY7NBSE77XER4KQ8NXK1Z')
+    .toPromise().then(res => {this.txtreaterService.coin_supply = res.result;})
     this.toggleOptions();
     // this.toggleFilters();
+  }
+
+  http_get(request: string): Observable<any> {
+    return this.http.get(request);
   }
 
   ngOnDestroy() {
@@ -115,7 +124,20 @@ export class EtherObserverComponent implements OnInit, OnDestroy {
     .then(() => {
       this.transactionList = []
       for(let i=0; i<num_blocks; i++) {
-        this.transactionList = this.transactionList.concat(transactionList[i])
+        for(let j=0; j<transactionList[i].length;j++) {
+          let tx_element = transactionList[i][j]
+          let txEntry = new TXData();
+          txEntry.from = tx_element.from;
+          txEntry.hash = tx_element.hash;
+          txEntry.value = this.web3service.toDecimal(tx_element.value);
+          txEntry.to = tx_element.to || tx_element.from;
+          txEntry.gas = tx_element.gas;
+          txEntry.gasPrice = tx_element.gasPrice;
+          txEntry.blockNumber = tx_element.blockNumber;
+          
+          if ((txEntry.from != undefined) && txEntry.to != undefined)
+            this.transactionList.push(txEntry);
+        }
       }
       this.mindmap.status = 'Evaluating blocks.';
       this.txtreaterService.readTxList(this.transactionList)

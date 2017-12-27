@@ -142,9 +142,9 @@ export class TxTreaterService {
 
   getEdgeSize(value): number {
     let relative_value: number = value / this.coin_supply;
-    if (relative_value > 1e-6) return 5
-    else if (1e-11 > relative_value) return 0.5
-    else return (relative_value - 1e-11) * (5-0.5)/(1e-6 - 1e-11) + 0.5
+    if (relative_value > 1e-7) return 5
+    else if (1e-11 > relative_value) return 0.1
+    else return (relative_value - 1e-11) * (5-0.1)/(1e-7 - 1e-11) + 0.1
   }
 
   setNodeList(nodeIdList?: Array<any>): void{
@@ -197,7 +197,8 @@ export class TxTreaterService {
         let title: string = 'TX: '+ edge.hash;
         if(edge.blockNumber!==undefined) {
           title = title + '<br> BlockNumber ' + edge.blockNumber;
-          title = title + ' @ ' + this.datePipe.transform(edge.timeStamp, 'medium');
+          if(edge.timeStamp!==undefined)
+            title = title + ' @ ' + this.datePipe.transform(edge.timeStamp, 'medium');
         };
         
         if(edge.gas!==undefined) title = title + '<br> Gas: ' + edge.gas;

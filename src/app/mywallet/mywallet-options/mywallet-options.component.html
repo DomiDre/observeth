@@ -1,0 +1,48 @@
+<p-dialog header='Options' [(visible)]='display' [width]=440>
+  <div><h4 style="text-align: left;">Your wallet address</h4></div>
+  <div>
+  <input id='AccountAdress' [(ngModel)]=accountAddress
+           placeholder="Public Key" style='width: 100%;'>
+  </div>
+  <div *ngIf="AccountErrorMessage">
+    {{AccountErrorMessage}}
+  </div>
+
+  <div><h4 style="text-align: left;">Set block range</h4></div>
+  <div style='text-align:center;' *ngIf="fromBlock">
+    <div class='row' style='width:100%;'>
+      <div class="col-sm-5">
+        <input class='BlockNumberInput' type='number' [(ngModel)]=fromBlock 
+           placeholder="From" style='width:100%' (ngModelChange)='setDate("from")'>
+        <div *ngIf="fromBlockDate">{{fromBlockDate | relativeDate}}</div>
+      </div>
+      <div class="col-sm-2">
+        - 
+      </div>
+      <div class="col-sm-5">
+        <input class='BlockNumberInput' type='number' [(ngModel)]=toBlock 
+           placeholder="To" style='width:100%' (ngModelChange)='setDate("to")'>
+        <div *ngIf="toBlockDate">{{toBlockDate | relativeDate}}</div>
+       </div>
+     </div>
+  </div>
+
+  <div><h4 style="text-align: left;">Set depth of tree</h4></div>
+  <div>
+  <input type='number' [(ngModel)]=tree_depth
+           placeholder="Tree Depth" style='width: 100%;'>
+  </div>
+  <div><h4 style="text-align: left;">Max. number of transactions per node</h4></div>
+  <div>
+  <input type='number' [(ngModel)]=maxTXperNode
+           placeholder="Max TX per node" style='width: 100%;'>
+  </div>
+  
+  <div style='font-size: 75%;'>
+    Starting from your wallet, the page will query EtherScan.io to fetch last transactions (up to the max. number set) in descending order from the latest block in range. Then for every connected node the same is done, considering only newer tx for outgoing flows and only older tx for incoming flows until the flow ends or tree depth is reached. The whole process takes quite some time due to the large amount of api calls (the longer the larger the tree depth + max. number of transactions... so grab a coffee).
+  </div>
+  <p-footer>
+    <button type="button" pButton icon="fa-check" (click)="getData()" label="Get"></button>
+  </p-footer>
+</p-dialog>
+
