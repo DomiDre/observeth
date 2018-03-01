@@ -119,7 +119,7 @@ export class MywalletComponent implements OnInit {
       }
     };
 
-    this.http_get('http://api.etherscan.io/api?module=account&action=txlist'+
+    this.http_get('https://api.etherscan.io/api?module=account&action=txlist'+
               '&address='+this.accountAddress+
               '&startblock='+this.firstBlockNumber+
               '&endblock='+this.latestBlockNumber+
@@ -238,7 +238,7 @@ export class MywalletComponent implements OnInit {
   }
 
   get_outgoing_tx(node_address, blockNumber): Promise<any> {
-    return this.http_get('http://api.etherscan.io/api?module=account&action=txlist'+
+    return this.http_get('https://api.etherscan.io/api?module=account&action=txlist'+
       '&address='+node_address+
       '&startblock='+blockNumber+
       '&endblock='+this.latestBlockNumber+
@@ -250,7 +250,7 @@ export class MywalletComponent implements OnInit {
   }
   
   get_incoming_tx(node_address, blockNumber): Promise<any> {
-    return this.http_get('http://api.etherscan.io/api?module=account&action=txlist'+
+    return this.http_get('https://api.etherscan.io/api?module=account&action=txlist'+
       '&address='+node_address+
       '&startblock='+this.firstBlockNumber+
       '&endblock='+blockNumber+

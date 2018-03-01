@@ -33,7 +33,7 @@ export class TxTreaterService {
   constructor(private web3service: Web3ConnectService,
               private datePipe: DatePipe) { 
     for(let erc20token of ERC20_tokens) {
-      this.etherWallets[erc20token.address] = erc20token.name + ' contract'
+      this.etherWallets[erc20token.address.toLowerCase()] = erc20token.name
     }
   }
 
@@ -134,14 +134,14 @@ export class TxTreaterService {
   }
 
   getNodeSize(value): number {
-    let relative_value: number = value / this.coin_supply;
+    let relative_value: number = value / this.coin_supply * 96.6e6*this.tokenDecimals/this.coin_supply;
     if (relative_value > 1e-6) return 25
     else if (1e-11 > relative_value) return 5
     else return (relative_value - 1e-11) * (25-5)/(1e-6 - 1e-11) + 5
   }
 
   getEdgeSize(value): number {
-    let relative_value: number = value / this.coin_supply;
+    let relative_value: number = value / this.coin_supply* 96.6e6*this.tokenDecimals/this.coin_supply;
     if (relative_value > 1e-7) return 5
     else if (1e-11 > relative_value) return 0.1
     else return (relative_value - 1e-11) * (5-0.1)/(1e-7 - 1e-11) + 0.1
@@ -157,9 +157,11 @@ export class TxTreaterService {
     this.nodes = [];
     for(let i=0; i<nodeIdList.length; i++){
       let node_id: number = nodeIdList[i];
+      let node_label: string = '';
       let title: string = '';
       if (this.etherWallets[this.nodeAddressList[node_id]] != undefined){
-        title = title + this.etherWallets[this.nodeAddressList[node_id]] + '<br>'
+        node_label = this.etherWallets[this.nodeAddressList[node_id]];
+        title = title + node_label + '<br>'
       }
       title = title +
         'Wallet: '+ this.nodeAddressList[node_id] + '<br>'+
@@ -174,7 +176,7 @@ export class TxTreaterService {
       }
       this.nodes.push({
         id: nodeIdList[i],
-        // label: this.nodeAddressList[node_id].slice(0, 8),
+        label: node_label,
         size: size,
         url: 'https://etherscan.io/address/'+this.nodeAddressList[node_id],
         title: title
@@ -210,6 +212,7 @@ export class TxTreaterService {
         this.edges.push({
           from: edge.from, 
           to: edge.to,
+          arrows: 'to',
           // label: edge.hash.slice(0,8),
           title: title,
           width: this.getEdgeSize(edge.value),

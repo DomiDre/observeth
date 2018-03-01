@@ -90,6 +90,7 @@ export class TokenObserverComponent implements OnInit, OnDestroy {
     this.transactionList = new Array<any>();
     
     this.ERC20_contract = this.web3service.getERC20Contract(this.tokenContractAddress)
+
     this.web3service.getERC20details(this.ERC20_contract)
     .then((data) => {
       this.txtreaterService.tokenDecimals = 10**this.web3service.toDecimal(data[0]);
@@ -113,6 +114,7 @@ export class TokenObserverComponent implements OnInit, OnDestroy {
         })
       })
     })
+    .catch(err => {console.log('error')})
   }
 
   updatePlot(): void {
@@ -133,7 +135,6 @@ export class TokenObserverComponent implements OnInit, OnDestroy {
       if (methodId === TransferHex) { // transfer: 1 transfers to 2 
         let txEntry = new TXData();
         txEntry.hash = txData.transactionHash;
-        
         txEntry.value = this.web3service.toDecimal(txData.data);
         txEntry.from = this.removeLeadingZeros0_20(txData.topics['1']);
         txEntry.to = this.removeLeadingZeros0_20(txData.topics['2']);

@@ -24,22 +24,28 @@ export var ERC20_tokens: any = [
     "logo": "bat.png"
   },
   {
+    "name": 'Binance',
+    "symbol": "BNB",
+    "address": '0xb8c77482e45f1f44de1745f52c74426c631bdd52',
+    "logo": "binance.png"
+  },
+  {
+    "name": 'Bloom',
+    "symbol": "BLT",
+    "address": '0x107c4504cd79c5d2696ea0030a8dd4e92601b82e',
+    "logo": "bloom.png"
+  },
+  {
     "name": 'Civic',
     "symbol": "CVC",
     "address": '0x41e5560054824ea6b0732e656e3ad64e20e94e45',
     "logo": "civic.png"
   },
   {
-    "name": 'Digix Global',
-    "symbol": "DGD",
-    "address": '0xe0b7927c4af23765cb51314a0e0521a9645f0e2a',
-    "logo": "digix.png"
-  },
-  {
-    "name": 'EOS',
-    "symbol": "EOS",
-    "address": '0x86fa049857e0209aa7d9e616f7eb3b3b78ecfdb0',
-    "logo": "eos.png"
+    "name": 'FunFair',
+    "symbol": "FUN",
+    "address": '0x419d0d8bdd9af5e606ae2232ed285aff190e711b',
+    "logo": "funfair.png"
   },
   {
     "name": 'Golem',
@@ -62,13 +68,13 @@ export var ERC20_tokens: any = [
   {
     "name": 'OmiseGo',
     "symbol": "OMG",
-    "address": '0xd26114cd6EE289AccF82350c8d8487fedB8A0C07',
+    "address": '0xd26114cd6ee289accf82350c8d8487fedb8a0c07',
     "logo": "omisego.png"
   },
   {
     "name": 'Qtum',
     "symbol": "QTUM",
-    "address": '0x9a642d6b3368ddc662CA244bAdf32cDA716005BC',
+    "address": '0x9a642d6b3368ddc662ca244badf32cda716005bc',
     "logo": "qtum.png"
   },
   {
@@ -88,6 +94,12 @@ export var ERC20_tokens: any = [
     "symbol": "RCN",
     "address": '0xf970b8e36e23f7fc3fd752eea86f8be8d83375a6',
     "logo": "ripio.png"
+  },
+  {
+    "name": 'Rivet',
+    "symbol": "RVT",
+    "address": '0x3d1ba9be9f66b8ee101911bc36d3fb562eac2244',
+    "logo": "rivet.png"
   },
   {
     "name": 'Santiment',
@@ -110,7 +122,7 @@ export var ERC20_tokens: any = [
   {
     "name": 'TenXPay',
     "symbol": "PAY",
-    "address": '0xB97048628DB6B661D4C2aA833e95Dbe1A905B280',
+    "address": '0xb97048628db6b661d4c2aa833e95dbe1a905b280',
     "logo": "tenx.png"
   },
 

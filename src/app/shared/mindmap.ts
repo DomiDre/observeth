@@ -39,14 +39,14 @@ export class Mindmap {
           min: 10,
           max: 25,
           label: {
-            min: 8,
-            max: 30,
+            min: 5,
+            max: 50,
             drawThreshold: 12,
             maxVisible: 20
           }
         },
         font: {
-          size: 12,
+          size: 24,
           face: 'Tahoma'
         },
         color: {
@@ -62,15 +62,15 @@ export class Mindmap {
           }
         }
       },
-      edges: {
-        width: 0.15,
-        color: {inherit: 'from'},
-        smooth: {
-          type: 'continuous'
-        },
-        arrows: 'to',
-        arrowStrikethrough: false
-      },
+      // edges: {
+      //   width: 0.15,
+      //   color: {inherit: 'from'},
+      //   smooth: {
+      //     type: 'continuous'
+      //   },
+      //   arrows: 'to',
+      //   arrowStrikethrough: false
+      // },
       physics: {
         stabilization: {
             enabled: true,
@@ -81,7 +81,13 @@ export class Mindmap {
         }
       },
       layout: {
-        improvedLayout: false
+        randomSeed: 1,
+        improvedLayout: true,
+        hierarchical: {
+            enabled: false, //change to true to see the other graph
+            direction: 'UD',
+            sortMethod: 'directed'
+        }
       },
       interaction: {
         dragNodes: true,

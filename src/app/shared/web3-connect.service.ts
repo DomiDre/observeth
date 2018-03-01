@@ -135,7 +135,7 @@ export class Web3ConnectService {
     return new Promise( (resolve, reject) => {
       erc20contract_function((error, result) => {
           if(error) reject(error)
-          else resolve(result)
+          else {resolve(result)}
       })
     })
   }
