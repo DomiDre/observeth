@@ -19,7 +19,7 @@ export class TxTreaterService {
   public nodeIdList: Array<number> = []; // positions corresponds to id of node
   public nodeAddressList: Array<string> = []; // positions corresponds to id, value is address
   public nodeAdjacencyList: Array<any> = []; // contains list for each to which other nodes it points and by which transaction
-  public nodeBalanceList: Array<number> = []; // contains list for each to which other nodes it points and by which transaction
+  public nodeBalanceList: Array<number> = []; // contains list for balance of each node
   public nodeTokenBalanceList: Array<number> = []; // if is erc20 token loaded, contains Token Balances
   // set from a selected list of nodes
   public nodes: Array<any> = []; // contains all data to plot nodes
@@ -153,12 +153,23 @@ export class TxTreaterService {
     }
     this.plotted_node_ids = nodeIdList;
     
-    // prepare wallet list
+    let nodeBalanceList;
+    if (this.tokenLoaded){
+      nodeBalanceList = this.nodeTokenBalanceList;
+    } else {
+      nodeBalanceList = this.nodeBalanceList;
+    }
+
+    let min_node_val = Math.min(...nodeBalanceList);
+    let max_node_val = Math.max(...nodeBalanceList);
+    let m = (100-10)/(max_node_val - min_node_val);
+    let b = 10;
     this.nodes = [];
     for(let i=0; i<nodeIdList.length; i++){
       let node_id: number = nodeIdList[i];
       let node_label: string = '';
       let title: string = '';
+
       if (this.etherWallets[this.nodeAddressList[node_id]] != undefined){
         node_label = this.etherWallets[this.nodeAddressList[node_id]];
         title = title + node_label + '<br>'
@@ -170,10 +181,9 @@ export class TxTreaterService {
       if (this.tokenLoaded){
         title = title + '<br>' +
           'Token Balance: ' + this.nodeTokenBalanceList[node_id]/this.tokenDecimals + '  ' + this.tokenSymbol;
-        size = this.getNodeSize(this.nodeTokenBalanceList[node_id]);
       } else {
-        size = this.getNodeSize(this.nodeBalanceList[node_id]);
       }
+      size = m*nodeBalanceList[node_id] + b;
       this.nodes.push({
         id: nodeIdList[i],
         label: node_label,
