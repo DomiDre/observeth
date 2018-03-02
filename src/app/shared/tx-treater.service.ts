@@ -162,8 +162,12 @@ export class TxTreaterService {
 
     let min_node_val = Math.min(...nodeBalanceList);
     let max_node_val = Math.max(...nodeBalanceList);
-    let m = (100-10)/(max_node_val - min_node_val);
-    let b = 10;
+    // let b = 15;
+    // let m = (50-b)/(max_node_val - min_node_val);
+
+    let A = (50-10)/(Math.sqrt(max_node_val) - Math.sqrt(min_node_val));
+    let b = 50 - A*Math.sqrt(max_node_val);
+
     this.nodes = [];
     for(let i=0; i<nodeIdList.length; i++){
       let node_id: number = nodeIdList[i];
@@ -183,7 +187,8 @@ export class TxTreaterService {
           'Token Balance: ' + this.nodeTokenBalanceList[node_id]/this.tokenDecimals + '  ' + this.tokenSymbol;
       } else {
       }
-      size = m*nodeBalanceList[node_id] + b;
+      // size = m*nodeBalanceList[node_id] + b;
+      size = A * Math.sqrt(nodeBalanceList[node_id]) +b;
       this.nodes.push({
         id: nodeIdList[i],
         label: node_label,
@@ -200,6 +205,24 @@ export class TxTreaterService {
     
     this.plotted_adjacency_list = nodeAdjacencyList;
     this.edges = [];
+
+    let vals = [];
+    for (let i=0; i<nodeAdjacencyList.length; i++) {
+      let adjacency_list = nodeAdjacencyList[i];
+      if (adjacency_list === undefined) continue;
+      for(let j=0; j<adjacency_list.length;j++) {
+        vals.push(adjacency_list[j].value);
+      }
+    }
+
+    let min_edge_value = Math.min(...vals);
+    let max_edge_value = Math.max(...vals);
+
+    // let b = 0.1;
+    // let m = (10-b)/(max_edge_value - min_edge_value);
+    let A = (10-0.1)/(Math.sqrt(max_edge_value) - Math.sqrt(min_edge_value));
+    let b = 10 - A*Math.sqrt(max_edge_value);
+    // console.log(m,b)
     for (let i=0; i<nodeAdjacencyList.length; i++) {
       let adjacency_list = nodeAdjacencyList[i];
       
@@ -225,7 +248,7 @@ export class TxTreaterService {
           arrows: 'to',
           // label: edge.hash.slice(0,8),
           title: title,
-          width: this.getEdgeSize(edge.value),
+          width: A*Math.sqrt(edge.value) + b,//m*edge.value+b,
           url:  'https://etherscan.io/tx/'+edge.hash
         });
       }      
