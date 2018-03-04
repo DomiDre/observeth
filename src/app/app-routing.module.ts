@@ -10,11 +10,14 @@ import { LiveEthereumObserverComponent } from './live-ethereum-observer/live-eth
 import { EtherObserverComponent } from './ether-observer/ether-observer.component';
 import { TokenObserverComponent } from './token-observer/token-observer.component';
 import { MywalletComponent } from './mywallet/mywallet.component';
+import { DexTrackComponent } from './dex-track/dex-track.component';
+
 const routes: Routes = [
   { path: '', redirectTo: '/main', pathMatch: 'full'},
   { path: 'main', component:MainComponent},
   { path: 'EtherObserver', component:EtherObserverComponent},
   { path: 'TokenObserver', component:TokenObserverComponent},
+  { path: 'DexTrack', component:DexTrackComponent},
   { path: 'About', component:AboutComponent},
   { path: 'Donate', component:DonateComponent},
   { path: 'Testpage', component:TestpageComponent},

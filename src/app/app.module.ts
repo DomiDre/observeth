@@ -34,7 +34,8 @@ import { StatisticsComponent } from './shared/statistics/statistics.component';
 
 import { RelativeDatePipe } from './shared/relative_time.pipe';
 import { MywalletComponent } from './mywallet/mywallet.component';
-import { MywalletOptionsComponent } from './mywallet/mywallet-options/mywallet-options.component'
+import { MywalletOptionsComponent } from './mywallet/mywallet-options/mywallet-options.component';
+import { DexTrackComponent } from './dex-track/dex-track.component'
 
 
 @NgModule({
@@ -62,7 +63,9 @@ import { MywalletOptionsComponent } from './mywallet/mywallet-options/mywallet-o
     
     MywalletComponent,
     
-    MywalletOptionsComponent
+    MywalletOptionsComponent,
+    
+    DexTrackComponent
   ],
   imports: [
     BrowserModule,
