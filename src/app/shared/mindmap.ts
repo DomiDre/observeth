@@ -82,7 +82,7 @@ export class Mindmap {
       },
       layout: {
         randomSeed: 1,
-        // improvedLayout: true,
+        improvedLayout: false,
         hierarchical: {
             enabled: false, //change to true to see the other graph
             direction: 'UD',

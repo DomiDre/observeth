@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, Input, NgZone } from '@angular/core';
 import { Web3ConnectService } from '../shared/web3-connect.service';
 import { TxTreaterService } from '../shared/tx-treater.service';
 import { TXData } from '../shared/txData';
+import { Router } from '@angular/router';
 
 import { OptionsService } from './etheroptions.service'
 import { Mindmap } from '../shared/mindmap';
@@ -46,6 +47,7 @@ export class EtherObserverComponent implements OnInit, OnDestroy {
   public filtered_adjacencyList: Array<any>;
 
   constructor(private zone: NgZone,
+              private router: Router,
               private web3service: Web3ConnectService,
               private txtreaterService: TxTreaterService,
               private optionService: OptionsService,
@@ -53,6 +55,8 @@ export class EtherObserverComponent implements OnInit, OnDestroy {
               private statisticsService: StatisticsService,
               private http: HttpClient) { }
   ngOnInit() {
+
+    // initialize subscriptions
     this.subscription_options = this.optionService.connectObservable()
                         .subscribe((data) => {
                           this.firstBlockNumber = data.from;
@@ -70,14 +74,24 @@ export class EtherObserverComponent implements OnInit, OnDestroy {
     this.subscription_statistics = this.statisticsService.connectObservable()
     .subscribe(() => {})
 
-
+    //initializing mindmap
     this.txtreaterService.disableTokenSetup();
     this.filtersService.setTokenMode(false);
     this.mindmap = new Mindmap(this.zone, this.txtreaterService);
     this.http_get('https://api.etherscan.io/api?module=stats&action=ethsupply&apikey=8FWC8GZWSE8SJKY7NBSE77XER4KQ8NXK1Z')
     .toPromise().then(res => {this.txtreaterService.coin_supply = res.result;})
-    this.toggleOptions();
-    // this.toggleFilters();
+
+
+    console.log('Ether Observer connecting ... ')
+    this.web3service.isConnected()
+    .then((isConnected) => {
+      if(!isConnected) {
+        console.log('No connection...')
+        this.router.navigateByUrl('/NoMetamask');
+      } else {
+        this.toggleOptions()
+      }
+    });
   }
 
   http_get(request: string): Observable<any> {
@@ -85,9 +99,9 @@ export class EtherObserverComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subscription_options.unsubscribe();
-    this.subscription_filter.unsubscribe();
-    this.subscription_statistics.unsubscribe();
+    if(this.subscription_options) this.subscription_options.unsubscribe();
+    if(this.subscription_filter) this.subscription_filter.unsubscribe();
+    if(this.subscription_statistics) this.subscription_statistics.unsubscribe();
   }
 
   updateData(): void {

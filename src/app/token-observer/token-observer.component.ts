@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, Input, NgZone, ElementRef } from '@angula
 import { Web3ConnectService } from '../shared/web3-connect.service';
 import { TxTreaterService } from '../shared/tx-treater.service';
 import { TXData } from '../shared/txData';
+import { Router } from '@angular/router';
 import * as vis from 'vis';
 import { ERC20_abi } from '../shared/erc20'
 import { OptionsService } from './options.service'
@@ -33,7 +34,6 @@ export class TokenObserverComponent implements OnInit, OnDestroy {
   private processingBlockNumber: number;
   
   public mindmap: Mindmap;
-
   private ERC20_contract: any;
 
   private subscription_options: Subscription;
@@ -45,6 +45,7 @@ export class TokenObserverComponent implements OnInit, OnDestroy {
 
 
   constructor(private zone: NgZone,
+              private router: Router,
               private web3service: Web3ConnectService,
               private txtreaterService: TxTreaterService,
               private element: ElementRef,
@@ -53,6 +54,8 @@ export class TokenObserverComponent implements OnInit, OnDestroy {
               private statisticsService: StatisticsService) { }
 
   ngOnInit() {
+
+    // initialize subscriptions
     this.subscription_options = this.optionService.connectObservable()
     .subscribe((data) => {
       this.tokenContractAddress = data.contractAddress;
@@ -71,15 +74,26 @@ export class TokenObserverComponent implements OnInit, OnDestroy {
     this.subscription_statistics = this.statisticsService.connectObservable()
     .subscribe(() => {})
 
+    // initialize mindmap
     this.mindmap = new Mindmap(this.zone, this.txtreaterService);
     this.filtersService.setTokenMode(true);
-    this.toggleOptions();
+
+    console.log('Token Observer connecting ... ')
+    this.web3service.isConnected()
+    .then((isConnected) => {
+      if(!isConnected) {
+        console.log('No connection...')
+        this.router.navigateByUrl('/NoMetamask');
+      } else {
+        this.toggleOptions()
+      }
+    });
   }
 
   ngOnDestroy() {
-    this.subscription_options.unsubscribe();
-    this.subscription_filter.unsubscribe();
-    this.subscription_statistics.unsubscribe();
+    if(this.subscription_options) this.subscription_options.unsubscribe();
+    if(this.subscription_filter) this.subscription_filter.unsubscribe();
+    if(this.subscription_statistics) this.subscription_statistics.unsubscribe();
   }
 
   updateData(): void {
@@ -100,11 +114,9 @@ export class TokenObserverComponent implements OnInit, OnDestroy {
     }).then( () => {
       this.mindmap.status = 'Getting logs between block ' + 
         this.firstBlockNumber + ' and ' + this.latestBlockNumber;
-      this.web3service.web3.eth.filter({
-        fromBlock: this.firstBlockNumber,
-        toBlock: this.latestBlockNumber,
-        address: this.tokenContractAddress
-      })
+      this.web3service.filter(this.firstBlockNumber,
+        this.latestBlockNumber,
+        this.tokenContractAddress)
       .get((error, logs) => {
         this.evaluateLogs0_20(logs, 
         () => {

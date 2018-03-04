@@ -1,7 +1,8 @@
-import { Component, OnInit, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { Web3ConnectService } from '../shared/web3-connect.service';
 import { TxTreaterService } from '../shared/tx-treater.service';
 import { Mindmap } from '../shared/mindmap';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs/Subscription';
 import { TXData } from '../shared/txData';
 
@@ -23,7 +24,7 @@ import { Observable } from 'rxjs'
   styleUrls: ['./mywallet.component.css'],
   providers: [ MywalletOptionsService, FiltersService, StatisticsService]
 })
-export class MywalletComponent implements OnInit {
+export class MywalletComponent implements OnInit, OnDestroy {
 
   private subscription_options: Subscription;
   private subscription_filter: Subscription;
@@ -43,6 +44,7 @@ export class MywalletComponent implements OnInit {
   public filtered_adjacencyList: Array<any>;
 
   constructor(private zone: NgZone,
+              private router: Router,
               private web3service: Web3ConnectService,
               private txtreaterService: TxTreaterService,
               
@@ -57,6 +59,7 @@ export class MywalletComponent implements OnInit {
     this.http_get('https://api.etherscan.io/api?module=stats&action=ethsupply&apikey='+this.etherscan_token)
     .toPromise().then(res => {this.txtreaterService.coin_supply = res.result;})
     
+    // initialize subscriptions
     this.subscription_options = this.optionService.connectObservable()
                         .subscribe((data) => {
                           this.accountAddress = data.contractAddress;
@@ -76,12 +79,28 @@ export class MywalletComponent implements OnInit {
 
     this.subscription_statistics = this.statisticsService.connectObservable()
     .subscribe(() => {})
-    
+
+    // initialize mindmap
     this.txtreaterService.disableTokenSetup();
     this.filtersService.setTokenMode(false);
     this.mindmap = new Mindmap(this.zone, this.txtreaterService);
 
-    this.toggleOptions();
+    console.log('My Wallet connecting ... ')
+    this.web3service.isConnected()
+    .then((isConnected) => {
+      if(!isConnected) {
+        console.log('No connection...')
+        this.router.navigateByUrl('/NoMetamask');
+      } else {
+        this.toggleOptions()
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    if(this.subscription_options) this.subscription_options.unsubscribe();
+    if(this.subscription_filter) this.subscription_filter.unsubscribe();
+    if(this.subscription_statistics) this.subscription_statistics.unsubscribe();
   }
 
   updateData(): void {

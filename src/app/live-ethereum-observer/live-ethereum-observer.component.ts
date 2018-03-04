@@ -62,8 +62,17 @@ export class LiveEthereumObserverComponent implements OnInit, OnDestroy {
     .toPromise().then(res => {this.txtreaterService.coin_supply = res.result;})
     this.isLiveUpdating = true;
 
-    if (!this.web3service.isConnected()) this.router.navigateByUrl('/NoMetamask');
-    else this.initializeDataCollection()
+
+    console.log('Live Ethereum Observer connecting ... ')
+    this.web3service.isConnected()
+    .then((isConnected) => {
+      if(!isConnected) {
+        console.log('No connection...')
+        this.router.navigateByUrl('/NoMetamask');
+      } else {
+        this.initializeDataCollection();
+      }
+    });
   }
   
   http_get(request: string): Observable<any> {
@@ -71,10 +80,10 @@ export class LiveEthereumObserverComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subscription_filter.unsubscribe();
-    this.subscription_statistics.unsubscribe();
+    if(this.subscription_filter) this.subscription_filter.unsubscribe();
+    if(this.subscription_statistics) this.subscription_statistics.unsubscribe();
     this.isLiveUpdating = false;
-    this.timer.unsubscribe();
+    if(this.timer) this.timer.unsubscribe();
   }
 
   initializeDataCollection(): void {

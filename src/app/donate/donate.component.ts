@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Web3ConnectService } from '../shared/web3-connect.service';
 import { TimerObservable } from 'rxjs/observable/TimerObservable';
 
@@ -14,7 +14,7 @@ interface GuestbookEntry {
   templateUrl: './donate.component.html',
   styleUrls: ['./donate.component.css']
 })
-export class DonateComponent implements OnInit {
+export class DonateComponent implements OnInit, OnDestroy {
   
 
   public guestbook_address: string = '0x322909bb3aA921F101d829c0eDF57493468D9BD4'; // ropsten address
@@ -27,22 +27,37 @@ export class DonateComponent implements OnInit {
 
   public timer: any;
 
+  public isConnected: boolean = false;
   public num_entries: number;
   public guestbook_entries: GuestbookEntry[];
-  constructor(public web3connect: Web3ConnectService) { }
+  constructor(public web3service: Web3ConnectService) { }
 
   ngOnInit() {
-    this.guestbook_contract = 
-      this.web3connect.getContract(this.guestbook_address, this.guestbook_abi);
 
-    this.timer = TimerObservable.create(0, 10000)
-    .subscribe( () => this.getMessages())
+    console.log('Donation Guestbook connecting ... ')
+    this.web3service.isConnected()
+    .then((isConnected) => {
+      if(!isConnected) {
+        console.log('No connection...')
+      } else {
+        this.isConnected = true;
+        this.guestbook_contract = 
+          this.web3service.getContract(this.guestbook_address, this.guestbook_abi);
+
+        this.timer = TimerObservable.create(0, 10000)
+        .subscribe( () => this.getMessages())
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    if(this.timer) this.timer.unsubscribe();
   }
 
   getMessages() {
-    this.web3connect.callFunctionReturningPromise(this.guestbook_contract.running_id)
+    this.web3service.callFunctionReturningPromise(this.guestbook_contract.running_id)
     .then((result) => {
-      this.num_entries = this.web3connect.toDecimal(result);
+      this.num_entries = this.web3service.toDecimal(result);
       let promisesGetEntries = []
       let guestbook_entries = []
       for(let i=0; i<this.num_entries; i++) {
@@ -76,7 +91,7 @@ export class DonateComponent implements OnInit {
       this.error_message = 'Please enter a positive number as donation.'
     }  else {
       let entry_message = this.entry_message || '';
-      this.web3connect.getConnectedAccount().then((account) => {
+      this.web3service.getConnectedAccount().then((account) => {
         new Promise( (resolve, reject) => {
           this.guestbook_contract.createEntry.estimateGas(this.entry_alias, entry_message,
           {from: account, value:this.entry_donation*1e18, gasPrice:1e9},

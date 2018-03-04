@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { ERC20_abi } from '../shared/erc20'
 
-import Web3 from 'web3';
+// import Web3 from 'web3';
+
+import Web3 = require('web3');
 
 declare global {
   interface Window { web3: any; }
@@ -12,52 +14,94 @@ window.web3 = window.web3 || undefined;
 @Injectable()
 export class Web3ConnectService {
 
-  private _web3: any;
+  private web3: any;
+  public connected_to: string;
+  public connected_to_network: string;
 
   constructor() {}
 
-  connectToNode(): void { 
-      console.log('Connecting to Web3...')
-      if (typeof this._web3 !== 'undefined') { // if already defined -> ok.
-        this.web3 = new this.Web3(this.web3.currentProvider);
+  isConnected(): Promise<boolean> {
+    // 0.20.2 method
+    if(!this.web3) {
+      return this.connectToNode();
+    } else {
+      return new Promise((resolve, reject) => {
+        resolve(this.web3.isConnected());
+      });
+    }
+    // 1.0 method
+    // return this.web3.eth.net.isListening();
+
+  }
+
+  connectToNode(): Promise<boolean> { 
+      console.log('Initializing Web3.')
+      if (typeof this.web3 !== 'undefined') { 
+        // if already defined -> ok.
+        console.log('Is already initialized. Reconnecting to current provider.')
+        this.web3 = new Web3(this.web3.currentProvider);
       } 
-      else if (typeof window.web3 !== 'undefined') { // use injected web3 provider from browser
+      else if (typeof window.web3 !== 'undefined') { 
+        // use injected web3 provider from browser
         console.log('Connecting to Metamask.')
         this.web3 = new this.Web3(window.web3.currentProvider);
-      }
-      else {
-        console.log('Metamask was not found. Trying to connect to localhost:8545');
+        this.connected_to = 'Metamask';
+      } else {
+        console.log('No Metamask found... Connecting to localhost:8545');
         this.web3 = new this.Web3(new this.Web3.providers.HttpProvider('http://localhost:8545'));
-        // use websocket provider. Run geth with: geth --syncmode "light" --ws --wsorigins "*" --rpc
-        // this.web3 = new this.Web3('ws://localhost:8546');
-
-        // Connect using web3 0.20.2
-        // console.log('Connecting to Infura.')
-        // this.web3 = new this.Web3(
-        //   new this.Web3.providers.HttpProvider('https://mainnet.infura.io/506w9CbDQR8fULSDR7H0'));
+        this.connected_to = 'Local Node';
       }
-      //console.log('Web3 version:', this.web3.version);
-      console.log('Web3 version:', this.web3.version.api);
+
+      // check if connection worked
+      return new Promise((resolve, reject) => {      
+        this.isConnected()
+        .then(connected => {
+          if(connected) {
+            console.log('Connected to ' + this.connected_to);
+            this.getNetworkId().then((network) => {
+              console.log('Connected to: ' + network);
+            })
+            //v0.2:
+            console.log('Web3 version:', this.web3.version.api);
+            resolve(true);
+          }
+          else throw 'Connecting failed.';
+        })
+        .catch(error => {
+          console.log(error);
+          resolve(false);
+        })
+      })
+
+      //v1.0:
+      // console.log('This page is using web3 version:', this.web3.version);
   }
 
-  get web3(): any {
-    if (!this._web3) {
-        this.connectToNode();
-    }
-    return this._web3;
-  }
+  getNetworkId(): Promise<string> {
+    // v0.2 method:
+    let id = this.web3.version.network;
+    return new Promise((resolve, reject) => {
+      if(id == 1) this.connected_to_network = 'Mainnet';
+      else if(id == 3) this.connected_to_network = 'Ropsten';
+      else if(id == 4) this.connected_to_network = 'Rinkeby';
+      else if(id == 42) this.connected_to_network = 'Kovan';
+      else this.connected_to_network = 'Unknown';
+      resolve(this.connected_to_network);   
+    })
 
-  set web3(web3: any) {
-    this._web3 = web3;
+    // v1.0 method:
+    // return this.web3.eth.net.getId().then(id => {
+    //   if(id == 1) this.connected_to_network = 'Mainnet';
+    //   else if(id == 3) this.connected_to_network = 'Ropsten';
+    //   else if(id == 4) this.connected_to_network = 'Rinkeby';
+    //   else if(id == 42) this.connected_to_network = 'Kovan';
+    //   else this.connected_to_network = 'Unknown';
+    //   resolve(this.connected_to_network);
+    //   })
   }
  
   get Web3(): any {
       return Web3;
-  }
-
-  isConnected(): boolean {
-    // 0.20.2 method
-    return this.web3.isConnected((error, result) => result);
   }
 
   toDecimal(data: any): number {
@@ -148,6 +192,13 @@ export class Web3ConnectService {
     return Promise.all([decimals, symbol, totalSupply])
   }
 
+  filter(firstBlockNumber, latestBlockNumber, tokenContractAddress): any {
+    return this.web3.eth.filter({
+      fromBlock: firstBlockNumber,
+      toBlock: latestBlockNumber,
+      address: tokenContractAddress
+    })
+  }
 
 }
 
