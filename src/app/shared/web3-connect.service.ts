@@ -85,7 +85,10 @@ export class Web3ConnectService {
       else if(id == 3) this.connected_to_network = 'Ropsten';
       else if(id == 4) this.connected_to_network = 'Rinkeby';
       else if(id == 42) this.connected_to_network = 'Kovan';
-      else this.connected_to_network = 'Unknown';
+      else {
+        console.log('Id unknown: ' + id);
+        this.connected_to_network = 'Unknown'
+      };
       resolve(this.connected_to_network);   
     })
 
@@ -199,6 +202,18 @@ export class Web3ConnectService {
       address: tokenContractAddress
     })
   }
+
+  event_filter(firstBlockNumber, latestBlockNumber,
+               tokenContractAddress, topics): any {
+    return this.web3.eth.filter({
+      fromBlock: firstBlockNumber,
+      toBlock: latestBlockNumber,
+      address: tokenContractAddress,
+      topics: topics
+    })
+  }
+
+
 
 }
 
