@@ -6,16 +6,16 @@ export var ERC20_tokens: any = [
     "logo": "0x.png"
   },
   {
-    "name": 'Augur',
-    "symbol": "REP",
-    "address": '0xe94327d07fc17907b4db788e5adf2ed424addff6',
-    "logo": "augur.png"
-  },
-  {
     "name": 'AirSwap',
     "symbol": "AST",
     "address": '0x27054b13b1b798b345b591a4d22e6562d47ea75a',
     "logo": "airswap.png"
+  },
+  {
+    "name": 'Augur',
+    "symbol": "REP",
+    "address": '0xe94327d07fc17907b4db788e5adf2ed424addff6',
+    "logo": "augur.png"
   },
   {
     "name": 'Basic Attention Token',
@@ -34,6 +34,12 @@ export var ERC20_tokens: any = [
     "symbol": "BLT",
     "address": '0x107c4504cd79c5d2696ea0030a8dd4e92601b82e',
     "logo": "bloom.png"
+  },
+  {
+    "name": 'Chainlink',
+    "symbol": "LINK",
+    "address": '0x514910771af9ca656af840dff83e8264ecf986ca',
+    "logo": "chainlink.png"
   },
   {
     "name": 'Civic',
