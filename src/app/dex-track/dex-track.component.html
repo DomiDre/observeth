@@ -2,3 +2,16 @@
   <h2>DEX Tracker</h2>
   <p>Get statistics/volume of the various DEX operating on Ethereum</p>
 </div>
+
+<div class='footer'>
+  <div *ngIf="tokenAddressesPair">
+    <div *ngFor="let token of tokenAddressesPair">
+      {{token}} <br>
+      {{tokenAddressesPair[token]}}
+      <div *ngFor="let token_pair of token"> 
+         <->{{token_pair.buyAmount}}
+      </div>
+      <div>---</div>
+    </div>
+  </div>
+</div>

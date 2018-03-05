@@ -67,9 +67,19 @@ export class DexTrackComponent implements OnInit, OnDestroy {
     }).then(DEXtxs => {
       return this.evalAirSwapDEX(DEXtxs.result);
     }).then(result => {
-      console.log(this.tokenAddresses);
-      console.log(this.tokenProperties);
-      console.log(this.tokenPairStatistics);
+      // console.log(this.tokenAddresses);
+      // console.log(this.tokenProperties);
+      // console.log(this.tokenPairStatistics);
+      for (let token in this.tokenPairStatistics) {
+        console.log(token + '<->');
+        for(let tokenPair in this.tokenPairStatistics[token]) {
+          console.log(tokenPair);
+          for(let transaction of this.tokenPairStatistics[token][tokenPair]) {
+            console.log(transaction);            
+          }
+        }
+
+      }
     })
   }
 
@@ -161,6 +171,10 @@ export class DexTrackComponent implements OnInit, OnDestroy {
       })
     }
     return Promise.all(tokenDetailsPromise);
+  }
+
+  get_tokenPairStatistic(token): any {
+    return this.tokenPairStatistics[token]
   }
 
   removeLeadingZeros0_20(data): string {
