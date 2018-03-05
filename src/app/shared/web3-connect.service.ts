@@ -3,7 +3,8 @@ import { ERC20_abi } from '../shared/erc20'
 
 // import Web3 from 'web3';
 
-import Web3 = require('web3');
+// import Web3 = require('web3');
+import * as Web3 from 'web3';
 
 declare global {
   interface Window { web3: any; }
