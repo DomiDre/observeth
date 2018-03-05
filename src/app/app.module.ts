@@ -33,6 +33,7 @@ import { FiltersComponent } from './shared/filters/filters.component';
 import { StatisticsComponent } from './shared/statistics/statistics.component';
 
 import { RelativeDatePipe } from './shared/relative_time.pipe';
+import { ReversePipe } from './shared/reverse.pipe'
 import { MywalletComponent } from './mywallet/mywallet.component';
 import { MywalletOptionsComponent } from './mywallet/mywallet-options/mywallet-options.component';
 import { DexTrackComponent } from './dex-track/dex-track.component'
@@ -60,6 +61,7 @@ import { DexTrackComponent } from './dex-track/dex-track.component'
     StatisticsComponent,
     
     RelativeDatePipe,
+    ReversePipe,
     
     MywalletComponent,
     

@@ -18,13 +18,12 @@ const epochs: any = [
  *   {{ 86400 |  relativeDate}}
  *   formats to: '1 day ago'
 */
-@Pipe({name: 'relativeDate'})
+    @Pipe({name: 'relativeDate'})
 export class RelativeDatePipe implements PipeTransform {
 
     getDuration(timeAgoInSeconds: number) {
         for (let [name, seconds] of epochs) {
             let interval = Math.floor(timeAgoInSeconds / seconds);
-
             if (interval >= 1) {
                 return {
                     interval: interval,

@@ -21,6 +21,8 @@ export class DexTrackComponent implements OnInit, OnDestroy {
 
   public tokenProperties = {};
   public tokenPairStatistics = {};
+
+  public tokenInfoLoaded: boolean = false;
   
   objectKeys = Object.keys;
 
@@ -54,7 +56,7 @@ export class DexTrackComponent implements OnInit, OnDestroy {
 
     this.web3service.getBlockNumber()
     .then((blocknumber) => {
-      let firstBlockNumber = blocknumber - 5838; // 24h for 14.8s block time
+      let firstBlockNumber = blocknumber - 5838 *7; // 24h for 14.8s block time
       let latestBlockNumber = blocknumber;
 
       return this.http_get(
@@ -68,20 +70,22 @@ export class DexTrackComponent implements OnInit, OnDestroy {
     }).then(DEXtxs => {
       return this.evalAirSwapDEX(DEXtxs.result);
     }).then(result => {
-      // console.log(this.tokenAddresses);
-      console.log(this.tokenProperties);
-      // console.log(this.tokenPairStatistics);
       for (let token in this.tokenPairStatistics) {
-        console.log(token + '<->');
-        console.log(this.tokenProperties[token])
+        let token_decimal = this.tokenProperties[token].decimal;
+        let token_symbol = this.tokenProperties[token].symbol;
         for(let tokenPair in this.tokenPairStatistics[token]) {
-          console.log(tokenPair);
+          let tokenPair_decimal = this.tokenProperties[tokenPair].decimal;
+          let tokenPair_symbol = this.tokenProperties[tokenPair].symbol;
           for(let transaction of this.tokenPairStatistics[token][tokenPair]) {
-            console.log(transaction);            
+            transaction.buyAmount = transaction.buyAmount / token_decimal;
+            transaction.buySymbol = token_symbol;
+            transaction.sellAmount = transaction.sellAmount / tokenPair_decimal;
+            transaction.sellSymbol = tokenPair_symbol;
+            
           }
         }
-
       }
+      this.tokenInfoLoaded = true;
     })
   }
 
@@ -157,20 +161,22 @@ export class DexTrackComponent implements OnInit, OnDestroy {
         'gasPrice': gasPrice,
         'gasUsed': gasUsed,
         'gasCost': gasCost,
-        'timestamp': timestamp
+        'timestamp': timestamp,
+        'makerAddress': makerAddress,
+        'takerAddress': takerAdress
       })
 
-      if(this.tokenPairStatistics[takerToken][makerToken] === undefined) {
-        this.tokenPairStatistics[takerToken][makerToken] = [];
-      }
-      this.tokenPairStatistics[takerToken][makerToken].push({
-        'buyAmount': takerAmount,
-        'sellAmount': makerAmount,
-        'gasPrice': gasPrice,
-        'gasUsed': gasUsed,
-        'gasCost': gasCost,
-        'timestamp': timestamp
-      })
+      // if(this.tokenPairStatistics[takerToken][makerToken] === undefined) {
+      //   this.tokenPairStatistics[takerToken][makerToken] = [];
+      // }
+      // this.tokenPairStatistics[takerToken][makerToken].push({
+      //   'buyAmount': takerAmount,
+      //   'sellAmount': makerAmount,
+      //   'gasPrice': gasPrice,
+      //   'gasUsed': gasUsed,
+      //   'gasCost': gasCost,
+      //   'timestamp': timestamp
+      // })
     }
     return Promise.all(tokenDetailsPromise);
   }
@@ -184,11 +190,15 @@ export class DexTrackComponent implements OnInit, OnDestroy {
   }
 
   get_tokenDecimal(token): number {
-    return this.tokenProperties[token]['decimal']
+    return this.tokenProperties[token].decimal;
   }
 
   get_tokenSymbol(token): string {
-    return this.tokenProperties[token]['symbol']
+    return this.tokenProperties[token].symbol;
+  }
+
+  get_addressSlice(address: string): string {
+    return address.slice(0,8);
   }
 
   removeLeadingZeros0_20(data): string {
