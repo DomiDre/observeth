@@ -7,9 +7,11 @@
   <div *ngIf="tokenAddressesPair">
     <div *ngFor="let token of tokenAddressesPair">
       {{token}} <br>
-      {{tokenAddressesPair[token]}}
-      <div *ngFor="let token_pair of token"> 
-         <->{{token_pair.buyAmount}}
+      <div *ngFor="let tokenPair of objectKeys(get_tokenPairs(token))">
+        {{tokenPair}}
+        <div *ngFor="let tx of get_pairStatistic(token, tokenPair)">
+          Timestamp: {{tx.timestamp}}, Buy: {{tx.buyAmount / get_tokenDecimal(token)}}, Sell: {{tx.sellAmount}}, GasCost: {{tx.gasCost}}
+        </div>
       </div>
       <div>---</div>
     </div>

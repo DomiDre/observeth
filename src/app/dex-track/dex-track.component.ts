@@ -21,7 +21,8 @@ export class DexTrackComponent implements OnInit, OnDestroy {
 
   public tokenProperties = {};
   public tokenPairStatistics = {};
-
+  
+  objectKeys = Object.keys;
 
   constructor(public web3service: Web3ConnectService,
               private http: HttpClient) { }
@@ -68,10 +69,11 @@ export class DexTrackComponent implements OnInit, OnDestroy {
       return this.evalAirSwapDEX(DEXtxs.result);
     }).then(result => {
       // console.log(this.tokenAddresses);
-      // console.log(this.tokenProperties);
+      console.log(this.tokenProperties);
       // console.log(this.tokenPairStatistics);
       for (let token in this.tokenPairStatistics) {
         console.log(token + '<->');
+        console.log(this.tokenProperties[token])
         for(let tokenPair in this.tokenPairStatistics[token]) {
           console.log(tokenPair);
           for(let transaction of this.tokenPairStatistics[token][tokenPair]) {
@@ -173,8 +175,20 @@ export class DexTrackComponent implements OnInit, OnDestroy {
     return Promise.all(tokenDetailsPromise);
   }
 
-  get_tokenPairStatistic(token): any {
+  get_tokenPairs(token): any {
     return this.tokenPairStatistics[token]
+  }
+
+  get_pairStatistic(token, tokenPair): Array<any> {
+    return this.tokenPairStatistics[token][tokenPair]
+  }
+
+  get_tokenDecimal(token): number {
+    return this.tokenProperties[token]['decimal']
+  }
+
+  get_tokenSymbol(token): string {
+    return this.tokenProperties[token]['symbol']
   }
 
   removeLeadingZeros0_20(data): string {
