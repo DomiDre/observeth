@@ -1,7 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Web3ConnectService } from '../shared/web3-connect.service';
+import { Component, OnInit, OnDestroy, NgZone, ViewChild, ElementRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs'
+import { ERC20_tokens } from '../shared/erc20';
+import { TimerObservable } from 'rxjs/observable/TimerObservable';
+
 
 @Component({
   selector: 'app-dex-track',
@@ -24,38 +26,118 @@ export class DexTrackComponent implements OnInit, OnDestroy {
 
   public tokenInfoLoaded: boolean = false;
   
+  public timer: any;
+
+  public refresh_time = 10000; // ms
+  @ViewChild('chart') el: ElementRef;
+
+  public test_tokens: any;
+
+  public dropdownTokens: Array<any>;
+  public dropdownMakerTokens: Array<any>;
+  public dropdownTakerTokens: Array<any>;
+  selectedMakerToken: any;
+  selectedTakerToken: any;
+
   objectKeys = Object.keys;
 
-  constructor(public web3service: Web3ConnectService,
-              private http: HttpClient) { }
+  constructor(private http: HttpClient,
+              private zone: NgZone) { }
 
   ngOnInit() {
-    console.log('Dex Tracker connecting ... ')
-    this.web3service.isConnected()
-    .then((isConnected) => {
-      if(!isConnected) {
-        console.log('No connection...')
-      } else {
-        this.readDex()
-      }
-    });
+    // this.dropdownTokens = [
+    //       {label:'AirSwap', value:{id:0, name: 'AirSwap', code: 'AST'}, logo:'airswap.png'},
+    //       {label:'Wrapped Ether', value:{id:1, name: 'Wrapped Ether', code: 'WETH'}, logo:'weth.png'},
+    //   ];
 
+    this.load_tokens();
+    this.readDex();
+    this.init_timer();
   }
 
   ngOnDestroy() {
+    if(this.timer) this.timer.unsubscribe();
+  }
 
+  init_timer(): void {
+    this.timer = TimerObservable.create(0, this.refresh_time)
+    .subscribe( () => this.readDex())
+  }
+
+  load_tokens(): void {
+    for(let token of ERC20_tokens) {
+      this.tokenProperties[token.address] = {
+         'name': token.name,
+         'symbol': token.symbol,
+         'decimal': 10**token.decimal,
+         'logo': token.logo
+      }
+    }
+  }
+
+  basicChart() {
+    let all_tx = this.tokenPairStatistics[this.selectedMakerToken.address][this.selectedTakerToken.address];
+    let x_data = [];
+    let y_data = [];
+    for (let tx of all_tx) {
+      let buy = tx.buyAmount;
+      let sell = tx.sellAmount;
+      let price = sell/buy;
+      let time = new Date(tx.timestamp*1000);
+      x_data.push(time);
+      y_data.push(price);
+    }
+    const data = [{
+      x: x_data,
+      y: y_data
+    }]
+
+
+    const element = this.el.nativeElement;
+    const style = {
+      margin: { t: 0 },
+      xaxis: {
+        autorange: true,
+        range: [Math.min(...x_data), Math.max(...x_data)],
+        rangeselector: {buttons: [
+            {
+              count: 1,
+              label: '1h',
+              step: 'hour',
+              stepmode: 'backward'
+            },
+            {
+              count: 24,
+              label: '24h',
+              step: 'hour',
+              stepmode: 'backward'
+            },
+            {step: 'all'}
+          ]},
+        rangeslider: {range: [Math.min(...x_data), Math.max(...x_data)]},
+        type: 'date'
+      },
+    }
+    Plotly.newPlot( element, data, style )
+  }
+
+  get tokens(): any {
+    return ERC20_tokens;
   }
 
   http_get(request: string): Observable<any> {
     return this.http.get(request);
   }
 
-  readDex() {
+  readDex(): void {
     let AirSwapMaker = '0x0000000000000000000000003940fd53e5a76ac724e217a4113298920e51dbc8';
     let AirSwapFilledEvent = '0xe59c5e56d85b2124f5e7f82cb5fcc6d28a4a241a9bdd732704ac9d3b6bfc98ab';
-
-    this.web3service.getBlockNumber()
+    
+    this.http_get('https://api.etherscan.io/api?module=proxy&action=eth_blockNumber&apikey='+
+                  this.etherscan_token
+    ).toPromise()
     .then((blocknumber) => {
+      blocknumber = parseInt(blocknumber.result, 16);
       let firstBlockNumber = blocknumber - 5838 *7; // 24h for 14.8s block time
       let latestBlockNumber = blocknumber;
 
@@ -68,11 +150,29 @@ export class DexTrackComponent implements OnInit, OnDestroy {
       '&apikey='+this.etherscan_token
       ).toPromise()
     }).then(DEXtxs => {
-      return this.evalAirSwapDEX(DEXtxs.result);
-    }).then(result => {
+      this.tokenAddresses = [];
+      this.tokenAddressesPair = [];
+      this.tokenPairStatistics = {};
+      this.dropdownTokens = [];
+
+      this.evalAirSwapDEX(DEXtxs.result); // go through results of API call and fill arrays
+      
+      // scale to decimals and get symbols
       for (let token in this.tokenPairStatistics) {
-        let token_decimal = this.tokenProperties[token].decimal;
-        let token_symbol = this.tokenProperties[token].symbol;
+        let token_props = this.tokenProperties[token]
+        let token_name = token_props.name;
+        let token_decimal = token_props.decimal;
+        let token_symbol = token_props.symbol;
+        let token_logo = token_props.logo;
+
+        this.dropdownTokens.push({label:token_name,
+                                  value:{
+                                    id:this.dropdownTokens.length,
+                                    symbol: token_symbol,
+                                    address: token
+                                  },
+                                  logo:token_logo});
+
         for(let tokenPair in this.tokenPairStatistics[token]) {
           let tokenPair_decimal = this.tokenProperties[tokenPair].decimal;
           let tokenPair_symbol = this.tokenProperties[tokenPair].symbol;
@@ -81,15 +181,22 @@ export class DexTrackComponent implements OnInit, OnDestroy {
             transaction.buySymbol = token_symbol;
             transaction.sellAmount = transaction.sellAmount / tokenPair_decimal;
             transaction.sellSymbol = tokenPair_symbol;
-            
           }
         }
       }
+
+      if (this.selectedMakerToken == undefined) {
+        this.selectedMakerToken = this.dropdownTokens[0].value;
+        this.dropdownUpdated();
+      }
       this.tokenInfoLoaded = true;
+      this.basicChart();
+    }).catch(error => {
+      console.log('Http Request failed. Retrying in ' + this.refresh_time/1e3);
     })
   }
 
-  evalAirSwapDEX(DEXtxs): Promise<any> {
+  evalAirSwapDEX(DEXtxs): void {
     let tokenDetailsPromise: Array<any> = [];
     for(let txData of DEXtxs) {
       //event Filled(address indexed makerAddress, uint makerAmount, address indexed makerToken, address takerAddress, uint takerAmount, address indexed takerToken, uint256 expiration, uint256 nonce);
@@ -97,14 +204,14 @@ export class DexTrackComponent implements OnInit, OnDestroy {
       let makerToken = this.removeLeadingZeros0_20(txData.topics['2']);
       let takerToken = this.removeLeadingZeros0_20(txData.topics['3']);
       
-      let gasUsed = this.web3service.toDecimal(txData.gasUsed);
-      let gasPrice = this.web3service.toDecimal(txData.gasPrice);
+      let gasUsed = parseInt(txData.gasUsed, 16);
+      let gasPrice = parseInt(txData.gasPrice, 16);
       let gasCost = gasPrice * gasUsed / 1e18;
       let data = txData.data;
-      let timestamp = this.web3service.toDecimal(txData.timeStamp);
-      let makerAmount = this.web3service.toDecimal(data.slice(0,2+64*1));
+      let timestamp = parseInt(txData.timeStamp, 16);
+      let makerAmount = parseInt(data.slice(0,2+64*1), 16);
       let takerAdress = this.removeLeadingZeros0_20('0x'+data.slice(2+64*1,2+64*2));
-      let takerAmount = this.web3service.toDecimal('0x'+data.slice(2+64*2,2+64*3));
+      let takerAmount = parseInt('0x'+data.slice(2+64*2,2+64*3), 16);
       let expiration = '0x'+data.slice(2+64*3,2+64*4);
       let nonce = '0x'+data.slice(2+64*4,2+64*5);
 
@@ -117,17 +224,6 @@ export class DexTrackComponent implements OnInit, OnDestroy {
 
         idx_makerToken = this.numTokens;
         this.numTokens++;
-        tokenDetailsPromise.push(
-          this.web3service.getERC20details(this.web3service.getERC20Contract(makerToken))
-          .then(data => {
-            let current_address = makerToken;
-            this.tokenProperties[current_address] = {
-              'decimal': 10**this.web3service.toDecimal(data[0]),
-              'symbol': data[1],
-              'totalSupply': this.web3service.toDecimal(data[2])
-            }
-          })
-        )
       }
 
       let idx_takerToken = this.tokenAddresses.indexOf(takerToken);
@@ -138,17 +234,6 @@ export class DexTrackComponent implements OnInit, OnDestroy {
 
         idx_takerToken = this.numTokens;
         this.numTokens++;
-        tokenDetailsPromise.push(
-          this.web3service.getERC20details(this.web3service.getERC20Contract(takerToken))
-          .then(data => {
-            let current_address = takerToken;
-            this.tokenProperties[current_address] = {
-              'decimal': 10**this.web3service.toDecimal(data[0]),
-              'symbol': data[1],
-              'totalSupply': this.web3service.toDecimal(data[2])
-            }
-          })
-        )
       }
 
       if(this.tokenPairStatistics[makerToken][takerToken] === undefined) {
@@ -165,20 +250,20 @@ export class DexTrackComponent implements OnInit, OnDestroy {
         'makerAddress': makerAddress,
         'takerAddress': takerAdress
       })
-
-      // if(this.tokenPairStatistics[takerToken][makerToken] === undefined) {
-      //   this.tokenPairStatistics[takerToken][makerToken] = [];
-      // }
-      // this.tokenPairStatistics[takerToken][makerToken].push({
-      //   'buyAmount': takerAmount,
-      //   'sellAmount': makerAmount,
-      //   'gasPrice': gasPrice,
-      //   'gasUsed': gasUsed,
-      //   'gasCost': gasCost,
-      //   'timestamp': timestamp
-      // })
     }
-    return Promise.all(tokenDetailsPromise);
+  }
+
+  
+  dropdownUpdated(): void {
+    let previousTaker = this.selectedTakerToken;
+    this.dropdownTakerTokens = this.dropdownTokens.slice(0);
+    this.dropdownTakerTokens.splice(this.selectedMakerToken.id, 1);
+
+    if(previousTaker == undefined || previousTaker.id == this.selectedMakerToken.id) 
+      this.selectedTakerToken = this.dropdownTakerTokens[0].value;
+    else 
+      this.selectedTakerToken = this.dropdownTokens[previousTaker.id].value;
+    this.basicChart();
   }
 
   get_tokenPairs(token): any {
@@ -186,7 +271,7 @@ export class DexTrackComponent implements OnInit, OnDestroy {
   }
 
   get_pairStatistic(token, tokenPair): Array<any> {
-    return this.tokenPairStatistics[token][tokenPair]
+    return this.tokenPairStatistics[token][tokenPair];
   }
 
   get_tokenDecimal(token): number {
@@ -206,4 +291,5 @@ export class DexTrackComponent implements OnInit, OnDestroy {
     while(cleaned_string.length < 42) cleaned_string = cleaned_string.replace('0x', '0x0')
     return cleaned_string;
   }
+
 }

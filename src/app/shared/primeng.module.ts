@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CheckboxModule, ButtonModule, DataTableModule, DataListModule,
-        DropdownModule, InputTextModule, 
-        InputTextareaModule, OverlayPanelModule, DialogModule, 
+        DropdownModule, InputTextModule,
+        InputTextareaModule, OverlayPanelModule, DialogModule,
         SpinnerModule, SidebarModule, SliderModule, SplitButtonModule, TooltipModule, 
         PanelModule } from 'primeng/primeng';
 import {TableModule} from 'primeng/table';

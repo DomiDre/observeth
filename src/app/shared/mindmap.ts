@@ -62,23 +62,29 @@ export class Mindmap {
           }
         }
       },
-      // edges: {
-      //   width: 0.15,
-      //   color: {inherit: 'from'},
-      //   smooth: {
-      //     type: 'continuous'
-      //   },
-      //   arrows: 'to',
-      //   arrowStrikethrough: false
-      // },
       physics: {
-        stabilization: {
-            enabled: true,
-            iterations: 180, // maximum number of iteration to stabilize
-            updateInterval: 10,
-            onlyDynamicEdges: false,
-            fit: true
-        }
+                  enabled: true,
+                  barnesHut: {
+                    gravitationalConstant: -2000,
+                    centralGravity: 0.3,
+                    springLength: 100,
+                    springConstant: 0.01,
+                    damping: 0.09,
+                    avoidOverlap: 0.1
+                  },
+                  maxVelocity: 50,
+                  minVelocity: 0.1,
+                  solver: 'barnesHut',
+                  stabilization: {
+                    enabled: true,
+                    iterations: 1000,
+                    updateInterval: 50,
+                    onlyDynamicEdges: false,
+                    fit: true
+                  },
+                  timestep: 0.5,
+                  adaptiveTimestep: true
+                
       },
       layout: {
         randomSeed: 1,
@@ -112,7 +118,29 @@ export class Mindmap {
 
     this.network.once("stabilizationIterationsDone", 
       () => {
-        // this.options["physics"] = false;
+        // this.options["physics"] = {
+        //                             enabled: true,
+        //                             barnesHut: {
+        //                               gravitationalConstant: -2000,
+        //                               centralGravity: 0.3,
+        //                               springLength: 200,
+        //                               springConstant: 0.04,
+        //                               damping: 0.09,
+        //                               avoidOverlap: 0
+        //                             },
+        //                             maxVelocity: 50,
+        //                             minVelocity: 0.1,
+        //                             solver: 'barnesHut',
+        //                             stabilization: {
+        //                               enabled: true,
+        //                               iterations: 1000,
+        //                               updateInterval: 100,
+        //                               onlyDynamicEdges: false,
+        //                               fit: true
+        //                             },
+        //                             timestep: 0.5,
+        //                             adaptiveTimestep: true
+        //                           };
         // this.network.setOptions(this.options);
         this.zone.run(() => {
           this.status = '';

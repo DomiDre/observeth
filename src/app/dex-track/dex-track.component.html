@@ -1,43 +1,57 @@
 <div class='header'>
-  <h2>AirSwap DEX Tracker v0.1</h2>
+  <h2>AirSwap DEX Tracker v0.2</h2>
   <p>Get statistics/volume of the AirSwap DEX operating on Ethereum</p>
 </div>
 
 <div class='footer'>
 
-      <div *ngIf="tokenInfoLoaded">
-        <div *ngFor="let token of tokenAddressesPair">
-          <div *ngFor="let tokenPair of objectKeys(get_tokenPairs(token))">
-            <br/>
-            <b><div style='text-align:center'>{{get_tokenSymbol(token)}} -> {{get_tokenSymbol(tokenPair)}}</div></b>
+  <div *ngIf="tokenInfoLoaded">
+    <p-dropdown [options]="dropdownTokens" [(ngModel)]="selectedMakerToken" [style]="{'width':'250px'}" [filter]="true" filterBy="label,value.symbol" (ngModelChange)="dropdownUpdated()">
+       <ng-template let-item pTemplate="selectedItem"> 
+          <img src="assets/erc20_logos/{{item.logo}}" style="vertical-align:middle" /> 
+          <span style="vertical-align:middle">{{item.label}}</span>
+      </ng-template> 
+    </p-dropdown>
+    <p-dropdown [options]="dropdownTakerTokens" [(ngModel)]="selectedTakerToken" [style]="{'width':'250px'}" [filter]="true" filterBy="label,value.symbol">
+       <ng-template let-item pTemplate="selectedItem"> 
+          <img src="assets/erc20_logos/{{item.logo}}" style="vertical-align:middle" /> 
+          <span style="vertical-align:middle">{{item.label}}</span>
+      </ng-template> 
+    </p-dropdown>
+  </div>
+  
+  <div #chart>
+  </div>
+  
+  <div *ngIf="tokenInfoLoaded">
+    <div *ngIf="selectedMakerToken.address !== selectedTakerToken.address">      
+      <b><div style='text-align:center'>{{selectedMakerToken.symbol}} -> {{selectedTakerToken.symbol}}</div></b>
 
-            <p-table [value]="get_pairStatistic(token, tokenPair) | reverse">
-              <ng-template pTemplate="header">
-                <tr>
-                  <th>Date</th>
-                  <th>Maker Sells</th>
-                  <th>Taker Pays</th>
-                  <th>Price</th>
-                  <th>Taker</th>
-                  <th>Gas Cost (Finney)</th>
-                </tr>
-              </ng-template>
-              <ng-template pTemplate="body" let-tx>
-                <tr>
-                  <td pTooltip="{{tx.timestamp*1000 | date:'long'}}">{{tx.timestamp*1000  | relativeDate}}</td>
-                  <td pTooltip="Maker: {{tx.makerAddress}}"><a target="_blank" 
-                      href='https://etherscan.io/address/{{tx.makerAddress}}'>{{tx.buyAmount}} {{tx.buySymbol}}</a></td>
-                  <td pTooltip="Taker: {{tx.takerAddress}}"><a target="_blank" 
-                      href='https://etherscan.io/address/{{tx.takerAddress}}'>{{tx.sellAmount}} {{tx.sellSymbol}} </a></td>
-                  <td>{{tx.sellAmount / tx.buyAmount}} {{tx.sellSymbol}} / {{tx.buySymbol}}</td>
-                  <td>{{get_addressSlice(tx.takerAddress)}} <a target="_blank" 
-                      href='https://etherscan.io/address/{{tx.takerAddress}}'><i class="fa fa-external-link"></i></a></td>
-                  <td>{{tx.gasCost * 1000}}</td>
-                </tr>
-              </ng-template>
-            </p-table>
-
-          </div>
-        </div>
-      </div>
+      <p-table [value]="get_pairStatistic(selectedMakerToken.address, selectedTakerToken.address) | reverse">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Date</th>
+            <th>Maker Sells</th>
+            <th>Taker Pays</th>
+            <th>Price</th>
+            <th>Taker</th>
+            <th>Gas Cost (Finney)</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-tx>
+          <tr>
+            <td pTooltip="{{tx.timestamp*1000 | date:'long'}}">{{tx.timestamp*1000  | relativeDate}}</td>
+            <td pTooltip="Maker: {{tx.makerAddress}}"><a target="_blank" 
+                href='https://etherscan.io/address/{{tx.makerAddress}}'>{{tx.buyAmount}} {{tx.buySymbol}}</a></td>
+            <td pTooltip="Taker: {{tx.takerAddress}}"><a target="_blank" 
+                href='https://etherscan.io/address/{{tx.takerAddress}}'>{{tx.sellAmount}} {{tx.sellSymbol}} </a></td>
+            <td>{{tx.sellAmount / tx.buyAmount}} {{tx.sellSymbol}} / {{tx.buySymbol}}</td>
+            <td>{{get_addressSlice(tx.takerAddress)}} <a target="_blank" 
+                href='https://etherscan.io/address/{{tx.takerAddress}}'><i class="fa fa-external-link"></i></a></td>
+            <td>{{tx.gasCost * 1000}}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
 </div>

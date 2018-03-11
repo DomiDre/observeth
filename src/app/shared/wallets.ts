@@ -27,6 +27,7 @@ export var EtherWallets = {
   '0xfdb16996831753d5331ff813c29a93c76834a0ad': 'Huobi_7?',
   '0x236f9f97e0e62388479bf9e5ba4889e46b0273c3': 'Huobi / Okex?',
   '0x2a0c0dbecc7e4d658f48e01e3fa353f44050c208': 'IDEX_1',
+  '0x2b5634c42055806a59e9107ed44d43c426e58258': 'Kucoin',
   '0x2910543af39aba0cd09dbb2d50200b3e800a63d2': 'Kraken_1',
   '0x0a869d79a7052c7f1b55a8ebabbea3420f0d1e13': 'Kraken_2',
   '0xe853c56864a2ebe4576a807d26fdc4a0ada51919': 'Kraken_3',

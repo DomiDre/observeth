@@ -15,6 +15,20 @@
     </span>
   </div>
   <div>
+    <span *ngFor="let token of tokens | slice:24:36">
+      <a (click)='setTokenContractAddress(token)'>
+        <img src='assets/erc20_logos/{{token.logo}}'>
+      </a>
+    </span>
+  </div>
+  <div>
+    <span *ngFor="let token of tokens | slice:36:48">
+      <a (click)='setTokenContractAddress(token)'>
+        <img src='assets/erc20_logos/{{token.logo}}'>
+      </a>
+    </span>
+  </div>
+  <div>
     <a (click)='setCustomTokenAddress()'>
       Enter Custom Address
     </a>

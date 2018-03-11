@@ -154,7 +154,7 @@ export class TokenObserverComponent implements OnInit, OnDestroy {
       } else if (methodId == ApproveHex) { // approve: you allowed somebody else to withdraw from your account
         // not implemented yet
       } else {
-        console.log(methodId,' not known, check ', txData.transactionHash,'. Please report this.');
+        // console.log(methodId,' not known, check ', txData.transactionHash,'. Please report this.');
       }
       this.processingBlockNumber = txData.blockNumber;
     }

@@ -18,6 +18,7 @@ const routes: Routes = [
   { path: 'EtherObserver', component:EtherObserverComponent},
   { path: 'TokenObserver', component:TokenObserverComponent},
   { path: 'DexTrack', component:DexTrackComponent},
+  { path: 'SwapTrack', component:DexTrackComponent},
   { path: 'About', component:AboutComponent},
   { path: 'Donate', component:DonateComponent},
   { path: 'Testpage', component:TestpageComponent},
