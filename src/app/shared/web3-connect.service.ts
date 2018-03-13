@@ -40,7 +40,7 @@ export class Web3ConnectService {
       if (typeof this.web3 !== 'undefined') { 
         // if already defined -> ok.
         console.log('Is already initialized. Reconnecting to current provider.')
-        this.web3 = new Web3(this.web3.currentProvider);
+        this.web3 = new this.Web3(this.web3.currentProvider);
       } 
       else if (typeof window.web3 !== 'undefined') { 
         // use injected web3 provider from browser
