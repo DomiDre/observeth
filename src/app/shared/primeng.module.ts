@@ -4,6 +4,7 @@ import { CheckboxModule, ButtonModule, DataTableModule, DataListModule,
         InputTextareaModule, OverlayPanelModule, DialogModule,
         SpinnerModule, SidebarModule, SliderModule, SplitButtonModule, TooltipModule, 
         PanelModule } from 'primeng/primeng';
+import {ToggleButtonModule} from 'primeng/togglebutton';
 import {TableModule} from 'primeng/table';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -31,6 +32,7 @@ import {AdvGrowlModule} from 'primeng-advanced-growl';
     SplitButtonModule,
     SliderModule,
     TableModule,
+    ToggleButtonModule,
     TooltipModule,
   ],
   exports: [
@@ -53,6 +55,7 @@ import {AdvGrowlModule} from 'primeng-advanced-growl';
     SpinnerModule,
     SliderModule,
     TableModule,
+    ToggleButtonModule,
     TooltipModule,
   ],
   providers: [],

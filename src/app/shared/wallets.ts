@@ -32,6 +32,8 @@ export var EtherWallets = {
   '0x0a869d79a7052c7f1b55a8ebabbea3420f0d1e13': 'Kraken_2',
   '0xe853c56864a2ebe4576a807d26fdc4a0ada51919': 'Kraken_3',
   '0x267be1c1d684f78cb4f6a176c4911b741e4ffdc0': 'Kraken_4',
+  '0x63825c174ab367968ec60f061753d3bbd36a0d8f': 'KyberReserve',
+  '0x964f35fae36d75b1e72770e244f6595b68508cf5': 'KyberNetwork',
   '0x5e575279bf9f4acf0a130c186861454247394c06': 'liqui.io_2',
   '0x09678741bd50c3e74301f38fbd0136307099ae5d': 'LocalEthereum.com',
   '0x52bc44d5378309ee2abf1539bf71de1b7d7be3b5': 'Nanopool',

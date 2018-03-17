@@ -1,23 +1,33 @@
 <div class='header'>
-  <h2>AirSwap DEX Tracker v0.2</h2>
+  <h2>AirSwap DEX Tracker (v0.3)</h2>
   <p>Get statistics/volume of the AirSwap DEX operating on Ethereum</p>
+  <p><i>This is an unofficial observation tool in its very early stages. We are in no way affiliated with the AirSwap Team. Homiedomi just likes the project.</i></p>
 </div>
 
 <div class='footer'>
 
   <div *ngIf="tokenInfoLoaded">
-    <p-dropdown [options]="dropdownTokens" [(ngModel)]="selectedMakerToken" [style]="{'width':'250px'}" [filter]="true" filterBy="label,value.symbol" (ngModelChange)="dropdownUpdated()">
-       <ng-template let-item pTemplate="selectedItem"> 
-          <img src="assets/erc20_logos/{{item.logo}}" style="vertical-align:middle" /> 
-          <span style="vertical-align:middle">{{item.label}}</span>
-      </ng-template> 
-    </p-dropdown>
-    <p-dropdown [options]="dropdownTakerTokens" [(ngModel)]="selectedTakerToken" [style]="{'width':'250px'}" [filter]="true" filterBy="label,value.symbol">
-       <ng-template let-item pTemplate="selectedItem"> 
-          <img src="assets/erc20_logos/{{item.logo}}" style="vertical-align:middle" /> 
-          <span style="vertical-align:middle">{{item.label}}</span>
-      </ng-template> 
-    </p-dropdown>
+    <div>
+      <p-dropdown [options]="dropdownTokens" [(ngModel)]="selectedMakerToken" [style]="{'width':'250px'}" [filter]="true" filterBy="label,value.symbol" (ngModelChange)="dropdownUpdated()">
+         <ng-template let-item pTemplate="selectedItem"> 
+            <img src="assets/erc20_logos/{{item.logo}}" style="vertical-align:middle" /> 
+            <span style="vertical-align:middle">{{item.label}}</span>
+        </ng-template> 
+      </p-dropdown>
+      <p-dropdown [options]="dropdownTakerTokens" [(ngModel)]="selectedTakerToken" [style]="{'width':'250px'}" [filter]="true" filterBy="label,value.symbol">
+         <ng-template let-item pTemplate="selectedItem"> 
+            <img src="assets/erc20_logos/{{item.logo}}" style="vertical-align:middle" /> 
+            <span style="vertical-align:middle">{{item.label}}</span>
+        </ng-template> 
+      </p-dropdown>
+    </div>
+    <br/>
+    <div>
+      <p-toggleButton [(ngModel)]="isPlotOHLC" onLabel="Switch to Timechart" offLabel="Switch to Candlestick" [style]="{'width':'250px'}" (onChange)="plot()"></p-toggleButton>
+    </div>
+  </div>
+  <div *ngIf="!tokenInfoLoaded">
+    Loading data... Might take a few seconds.
   </div>
   
   <div #chart>
@@ -25,7 +35,7 @@
   
   <div *ngIf="tokenInfoLoaded">
     <div *ngIf="selectedMakerToken.address !== selectedTakerToken.address">      
-      <b><div style='text-align:center'>{{selectedMakerToken.symbol}} -> {{selectedTakerToken.symbol}}</div></b>
+      <b><div style='text-align:center'>{{selectedMakerToken.symbol}} <-> {{selectedTakerToken.symbol}}</div></b>
 
       <p-table [value]="get_pairStatistic(selectedMakerToken.address, selectedTakerToken.address) | reverse">
         <ng-template pTemplate="header">
@@ -41,14 +51,12 @@
         <ng-template pTemplate="body" let-tx>
           <tr>
             <td pTooltip="{{tx.timestamp*1000 | date:'long'}}">{{tx.timestamp*1000  | relativeDate}}</td>
-            <td pTooltip="Maker: {{tx.makerAddress}}"><a target="_blank" 
-                href='https://etherscan.io/address/{{tx.makerAddress}}'>{{tx.buyAmount | number:'1.0-4'}} {{tx.buySymbol}}</a></td>
-            <td pTooltip="Taker: {{tx.takerAddress}}"><a target="_blank" 
-                href='https://etherscan.io/address/{{tx.takerAddress}}'>{{tx.sellAmount | number:'1.0-4'}} {{tx.sellSymbol}} </a></td>
-            <td>{{tx.price.toExponential(3)}}</td>
-            <td>{{get_addressSlice(tx.takerAddress)}} <a target="_blank" 
+            <td pTooltip="Bought: {{tx.buyAmount}} {{tx.buySymbol}}">{{tx.buyAmount | number:'1.0-4'}} {{tx.buySymbol}}</td>
+            <td pTooltip="Sold: {{tx.sellAmount}} {{tx.sellSymbol}}">{{tx.sellAmount | number:'1.0-4'}} {{tx.sellSymbol}}</td>
+            <td pTooltip="Price: {{tx.price}}">{{tx.price.toExponential(3)}}</td>
+            <td pTooltip="Maker: {{tx.makerAddress}}\n Taker: {{tx.takerAddress}}">{{get_addressSlice(tx.takerAddress)}} <a target="_blank" 
                 href='https://etherscan.io/address/{{tx.takerAddress}}'><i class="fa fa-external-link"></i></a></td>
-            <td>{{tx.gasCost * 1000 | number:'1.4'}}</td>
+            <td pTooltip="Gas cost: {{tx.gasCost * 1000}}">{{tx.gasCost * 1000 | number:'1.4'}}</td>
           </tr>
         </ng-template>
       </p-table>
